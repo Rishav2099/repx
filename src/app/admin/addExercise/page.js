@@ -10,10 +10,12 @@ const AddExercise = () => {
   });
 
   const [message, setMessage] = useState(null);
+  const [sending, setSending] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setSending(true);
       const response = await fetch("/api/exercise/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -28,6 +30,8 @@ const AddExercise = () => {
       }
     } catch (error) {
       setMessage("Server error occurred.");
+    } finally {
+      setSending(false);
     }
   };
 
@@ -96,8 +100,14 @@ const AddExercise = () => {
           <option value="Calves">Calves</option>
           <option value="Forearms">Forearms</option>
         </select>
-        <button type="submit" className="p-3 bg-blue-500 rounded-lg text-white">
-          Add Exercise
+        <button
+          type="submit"
+          className={`p-3 rounded-lg text-white ${
+            sending ? "bg-gray-500" : "bg-blue-500"
+          }`}
+          disabled={sending}
+        >
+          {sending ? "Submitting..." : "Add Exercise"}
         </button>
       </form>
     </div>
