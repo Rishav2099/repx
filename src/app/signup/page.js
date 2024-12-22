@@ -22,7 +22,7 @@ const Page = () => {
                 body: raw,
             };
     
-            const res = await fetch("http://localhost:3000/api/signup", requestOptions);
+            const res = await fetch("/api/signup", requestOptions);
             const data = await res.json();
     
             if (!res.ok) {
