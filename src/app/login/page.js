@@ -43,7 +43,7 @@ const Page = () => {
     return (
         <div className="min-h-screen flex flex-col justify-center items-center">
             <div className="bg-black shadow-md rounded-lg p-8 w-full max-w-md">
-                <h1 className="text-2xl font-bold text-center mb-6 text-white">Sign In</h1>
+                <h1 className="text-2xl font-bold text-center mb-6 text-white">Log In</h1>
                 <form
                     className="text-black caret-blue-500 flex flex-col gap-6 bg-slate-900 p-10 border rounded-2xl justify-center items-center"
                     onSubmit={submit} // Call the submit function on form submission
