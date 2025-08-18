@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import axios from "axios";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 
 interface workoutSchema {
   workoutName: string;
@@ -20,8 +20,8 @@ interface workoutSchema {
 }
 
 // ✅ Component name capital letter se
-const Page = ({ params }: { params: { id: string } }) => {
-  const { id } = params; // ✅ React.use hata diya
+const Page = ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id } = use(params);
   const [workout, setWorkout] = useState<workoutSchema | null>(null);
   const [loading, setLoading] = useState(false);
 
