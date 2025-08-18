@@ -211,7 +211,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
 
                 {/* Conditional Fields */}
                 {watchType === "reps" &&
-                  ["reps", "sets"].map((fieldName) => (
+                 (["reps", "sets"] as const).map((fieldName) => (
                     <FormField
                       key={fieldName}
                       control={form.control}
