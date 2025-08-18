@@ -101,7 +101,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
 
   useEffect(() => {
     fetchWorkout();
-  }, []);
+  });
 
   useEffect(() => {
     if (workout && workout.exercises[currentIndex]?.time) {

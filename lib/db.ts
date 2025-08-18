@@ -32,7 +32,8 @@ export async function connectToDatabase() {
     cached.conn = await cached.promise
   } catch (error) {
     cached.promise = null
-    throw new Error('check database files')
+    console.log(error)
+    throw new Error('check database files' )
   }
 
   return cached.conn

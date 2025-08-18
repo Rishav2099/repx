@@ -51,11 +51,8 @@ export function SignupForm({
     }
 
     
-  } catch (err: any) {
+  } catch (err ) {
     console.error("Signup error:", err);
-    const message =
-      err.response?.data?.error || "Something went wrong. Please try again.";
-    setError(message);
   }
   };
   return (

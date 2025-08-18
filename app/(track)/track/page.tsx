@@ -8,10 +8,12 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  TooltipProps,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 
 type Workout = {
   _id: string;
@@ -30,7 +32,7 @@ const getCurrentWeekDays = (workouts: Workout[]): ChartData[] => {
   const startOfWeek = new Date(today);
   startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday
 
-  let days: ChartData[] = [];
+  const days: ChartData[] = []; // ✅ const used
 
   for (let i = 0; i < 7; i++) {
     const d = new Date(startOfWeek);
@@ -53,8 +55,11 @@ const getCurrentWeekDays = (workouts: Workout[]): ChartData[] => {
   return days;
 };
 
-// ✅ Custom Tooltip component
-const CustomTooltip = ({ active, payload, label }: any) => {
+// ✅ Properly typed Custom Tooltip
+const CustomTooltip = ({
+  active,
+  payload,
+}: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
     return (
       <div className="dark:bg-white/90 backdrop-blur-md border border-gray-200 shadow-md px-3 py-2 rounded-lg text-sm">
@@ -103,8 +108,10 @@ export default function WeeklyChart() {
                 <CartesianGrid vertical={false} horizontal={false} />
                 <XAxis dataKey="day" axisLine={true} tickLine={false} />
                 <YAxis axisLine={false} tickLine={false} />
-                {/* ✅ Custom tooltip use kiya */}
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(0,0,0,0.05)" }} />
+                <Tooltip
+                  content={<CustomTooltip />}
+                  cursor={{ fill: "rgba(0,0,0,0.05)" }}
+                />
                 <Bar
                   dataKey="value"
                   fill="#3c191a"

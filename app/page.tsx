@@ -46,7 +46,7 @@ export default function Home() {
     if (userId) {
       fetchWorkout();
     }
-  }, [session]);
+  }, [session, fetchWorkout, userId]);
 
   if (status === "loading" || loading) {
     return <div>Loading...</div>;

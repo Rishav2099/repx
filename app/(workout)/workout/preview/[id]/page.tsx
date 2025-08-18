@@ -1,12 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import axios from "axios";
 import { EllipsisVertical, Loader2 } from "lucide-react";
@@ -24,7 +18,7 @@ interface Workout {
   }[];
 }
 
-const page = ({ params }: { params: Promise<{ id: string }> }) => {
+const Page = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = use(params);
 
   const [loading, setLoading] = useState(false);
@@ -46,7 +40,7 @@ const page = ({ params }: { params: Promise<{ id: string }> }) => {
 
   useEffect(() => {
     fetchWorkout();
-  }, []);
+  });
 
   // Loader
   if (loading || !workout) {
@@ -97,4 +91,4 @@ const page = ({ params }: { params: Promise<{ id: string }> }) => {
   );
 };
 
-export default page;
+export default Page;

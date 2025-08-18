@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { EllipsisVertical, Pencil, Share, Share2, Trash } from "lucide-react";
+import { EllipsisVertical, Pencil, Share2, Trash } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,13 +24,10 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 
 interface workoutProps {
@@ -74,6 +71,7 @@ const WorkoutDisplay = ({ workout }: workoutProps) => {
     try {
       await navigator.share(shareData);
     } catch (error) {
+      console.log(error)
       setShowShareLink(true);
     }
   };
