@@ -142,7 +142,7 @@ const WorkoutDisplay = ({ workout }: workoutProps) => {
                   e.stopPropagation();
                   deleteWorkout(workout._id);
                 }}
-                className="cursor-pointer"
+                className="cursor-pointer bg-red-500"
               >
                 Delete
               </AlertDialogAction>
@@ -150,36 +150,6 @@ const WorkoutDisplay = ({ workout }: workoutProps) => {
           </AlertDialogContent>
         </AlertDialog>
       </Link>
-      {showShareLink && (
-        <Dialog open={showShareLink} onOpenChange={setShowShareLink}>
-          <form>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Share Link</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4">
-                <input
-                  className="bg-[#3c191a] border-2 border-red-500 p-2 rounded-lg"
-                  type="text"
-                  defaultValue={shareLink}
-                  disabled
-                />
-              </div>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
-                <Button
-                  variant={"primary"}
-                  onClick={() => navigator.clipboard.writeText(shareLink)}
-                >
-                  Copy Link
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </form>
-        </Dialog>
-      )}
     </>
   );
 };
