@@ -13,7 +13,10 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
+import {
+  NameType,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
 
 type Workout = {
   _id: string;
@@ -32,7 +35,7 @@ const getCurrentWeekDays = (workouts: Workout[]): ChartData[] => {
   const startOfWeek = new Date(today);
   startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday
 
-  const days: ChartData[] = []; // ✅ const used
+  const days: ChartData[] = [];
 
   for (let i = 0; i < 7; i++) {
     const d = new Date(startOfWeek);
@@ -55,14 +58,13 @@ const getCurrentWeekDays = (workouts: Workout[]): ChartData[] => {
   return days;
 };
 
-// ✅ Properly typed Custom Tooltip
 const CustomTooltip = ({
   active,
   payload,
 }: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
     return (
-      <div className="dark:bg-white/90 backdrop-blur-md border border-gray-200 shadow-md px-3 py-2 rounded-lg text-sm">
+      <div className="dark:bg-white/90 backdrop-blur-md border border-gray-200 shadow-md px-3 py-2 rounded-lg text-xs sm:text-sm">
         <p className="text-red-600">{`Workouts: ${payload[0].value}`}</p>
       </div>
     );
@@ -92,22 +94,36 @@ export default function WeeklyChart() {
   }, [workouts]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center p-6">
-      <h1 className="text-3xl font-bold mb-6 tracking-wide">
+    <div className="min-h-screen flex flex-col items-center p-4 sm:p-6">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 tracking-wide text-center">
         Workout Analysis
       </h1>
 
-      <Card className="w-full max-w-3xl shadow-lg rounded-2xl border border-gray-200">
+      <Card className="w-full max-w-full sm:max-w-3xl shadow-lg rounded-2xl border border-gray-200">
         <CardHeader>
-          <CardTitle className="text-xl font-semibold">This Week</CardTitle>
+          <CardTitle className="text-lg sm:text-xl font-semibold">
+            This Week
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="w-full h-72">
+          <div className="w-full h-64 sm:h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data}>
+              <BarChart data={data} barCategoryGap="20%">
                 <CartesianGrid vertical={false} horizontal={false} />
-                <XAxis dataKey="day" axisLine={true} tickLine={false} />
-                <YAxis axisLine={false} tickLine={false} />
+                <XAxis
+                  dataKey="day"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 10 }} // ✅ smaller text on mobile
+                  interval={0} // ✅ force show all labels
+                  minTickGap={0} // ✅ no auto skipping
+                />
+
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12 }}
+                />
                 <Tooltip
                   content={<CustomTooltip />}
                   cursor={{ fill: "rgba(0,0,0,0.05)" }}
@@ -118,7 +134,7 @@ export default function WeeklyChart() {
                   stroke="#B91C1C"
                   strokeWidth={2}
                   radius={[6, 6, 0, 0]}
-                  barSize={40}
+                  barSize={20} // ✅ smaller on mobile
                 />
               </BarChart>
             </ResponsiveContainer>
