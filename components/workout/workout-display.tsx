@@ -46,7 +46,7 @@ interface workoutProps {
 const WorkoutDisplay = ({ workout }: workoutProps) => {
   const router = useRouter();
   const [showShareLink, setShowShareLink] = useState(false);
-  const [shareLink , setShareLink ] = useState('')
+  const [shareLink, setShareLink] = useState("");
 
   const deleteWorkout = async (id: string) => {
     try {
@@ -61,19 +61,15 @@ const WorkoutDisplay = ({ workout }: workoutProps) => {
 
   const shareWorkout = async (id: string) => {
     const shareUrl = `${window.location.origin}/workout/share/${id}`;
-    setShareLink(shareUrl)
+    setShareLink(shareUrl);
 
     const shareData = {
       title: `Check out my ${workout.workoutName} workout 💪`,
       text: "Here’s my workout plan!",
       url: shareUrl,
     };
-    try {
-      await navigator.share(shareData);
-    } catch (error) {
-      console.log(error)
-      setShowShareLink(true);
-    }
+
+    await navigator.share(shareData);
   };
 
   return (
@@ -162,13 +158,23 @@ const WorkoutDisplay = ({ workout }: workoutProps) => {
                 <DialogTitle>Share Link</DialogTitle>
               </DialogHeader>
               <div className="grid gap-4">
-                <input className="bg-[#3c191a] border-2 border-red-500 p-2 rounded-lg" type="text" defaultValue={shareLink} disabled />
+                <input
+                  className="bg-[#3c191a] border-2 border-red-500 p-2 rounded-lg"
+                  type="text"
+                  defaultValue={shareLink}
+                  disabled
+                />
               </div>
               <DialogFooter>
                 <DialogClose asChild>
                   <Button variant="outline">Cancel</Button>
                 </DialogClose>
-                <Button variant={'primary'} onClick={() => navigator.clipboard.writeText(shareLink)}>Copy Link</Button>
+                <Button
+                  variant={"primary"}
+                  onClick={() => navigator.clipboard.writeText(shareLink)}
+                >
+                  Copy Link
+                </Button>
               </DialogFooter>
             </DialogContent>
           </form>
