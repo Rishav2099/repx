@@ -121,7 +121,7 @@ const Page = () => {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
       >
-        <h1 className="text-6xl font-mono font-bold tracking-wider">
+        <h1 className="text-6xl  font-bold tracking-widest">
           {formatTime(time)}
         </h1>
       </motion.div>
