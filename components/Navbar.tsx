@@ -12,7 +12,7 @@ const Navbar = () => {
 
   const hideNavbarPaths = ["/login", "/register"];
 
-  if (pathname.startsWith("/workout") || !session || hideNavbarPaths.includes(pathname)) {
+  if ((pathname.startsWith("/workout") && pathname != '/workout/add') || !session || hideNavbarPaths.includes(pathname)) {
     return null;
   }
 
@@ -20,7 +20,7 @@ const Navbar = () => {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <div>
+    <div className="dark:bg-black bg-white">
       <ul className="flex justify-evenly items-center w-full py-3 border-t-2 text-xs select-none">
         <li
           className={`flex flex-col items-center cursor-pointer ${

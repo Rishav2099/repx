@@ -79,7 +79,7 @@ const Page = () => {
   };
 
   return (
-    <div>
+    <div className="pb-10">
       <h1 className="text-center font-bold text-2xl py-4">Add Workout</h1>
       <Separator />
       <Form {...form}>
