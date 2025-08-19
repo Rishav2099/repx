@@ -21,7 +21,7 @@ const Navbar = () => {
 
   return (
     <div>
-      <ul className="flex justify-evenly items-center w-full py-3 border-t-2 text-xs">
+      <ul className="flex justify-evenly items-center w-full py-3 border-t-2 text-xs select-none">
         <li
           className={`flex flex-col items-center cursor-pointer ${
             isActive("/") ? "text-red-600 font-semibold" : "text-gray-600"
