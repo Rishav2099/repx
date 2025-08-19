@@ -17,6 +17,7 @@ import {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
+import { useTheme } from "next-themes";
 
 type Workout = {
   _id: string;
@@ -34,6 +35,7 @@ const getCurrentWeekDays = (workouts: Workout[]): ChartData[] => {
   const today = new Date();
   const startOfWeek = new Date(today);
   startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday
+  
 
   const days: ChartData[] = [];
 
@@ -75,6 +77,7 @@ const CustomTooltip = ({
 export default function WeeklyChart() {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [data, setData] = useState<ChartData[]>([]);
+  const { theme } = useTheme()
 
   const fetchWorkouts = async () => {
     try {
@@ -131,7 +134,7 @@ export default function WeeklyChart() {
                 />
                 <Bar
                   dataKey="value"
-                  fill="#3c191a"
+                 fill={theme === "dark" ? "#3c191a" : "#ff767b"}
                   stroke="#B91C1C"
                   strokeWidth={2}
                   radius={[6, 6, 0, 0]}

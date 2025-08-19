@@ -119,7 +119,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
 
   useEffect(() => {
     fetchWorkout();
-  });
+  }, [id]);
 
   if (loading || !workout) {
     return <div>Loading...</div>;
