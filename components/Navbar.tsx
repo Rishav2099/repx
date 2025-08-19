@@ -44,7 +44,7 @@ const Navbar = () => {
 
         <li
           className={`flex flex-col items-center cursor-pointer ${
-            isActive("/add") ? "text-red-600 font-semibold" : "text-gray-600"
+            isActive("/workout/add") ? "text-red-600 font-semibold" : "text-gray-600"
           }`}
           onClick={() => router.push("/workout/add")}
         >
