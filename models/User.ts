@@ -1,5 +1,6 @@
 import mongoose, { Schema, model, models } from "mongoose";
 import bcrypt from "bcryptjs";
+import { unique } from "next/dist/build/utils";
 
 const userSchema: Schema = new Schema(
   {
@@ -8,7 +9,7 @@ const userSchema: Schema = new Schema(
       type: String,
       select: false, // never return password in queries
     },
-    email: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
     userName: { type: String },
     workouts: [
       {
