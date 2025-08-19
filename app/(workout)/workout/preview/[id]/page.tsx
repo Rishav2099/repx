@@ -40,7 +40,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
 
   useEffect(() => {
     fetchWorkout();
-  });
+  }, [id]);
 
   // Loader
   if (loading || !workout) {
