@@ -64,7 +64,7 @@ const WorkoutDisplay = ({ workout }: workoutProps) => {
     setShareLink(shareUrl)
 
     const shareData = {
-      title: "Check out my workout 💪",
+      title: `Check out my ${workout.workoutName} workout 💪`,
       text: "Here’s my workout plan!",
       url: shareUrl,
     };
