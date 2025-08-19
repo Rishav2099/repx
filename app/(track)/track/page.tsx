@@ -109,19 +109,20 @@ export default function WeeklyChart() {
           <div className="w-full h-64 sm:h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data} barCategoryGap="20%">
-                <CartesianGrid vertical={false} horizontal={false} />
+                <CartesianGrid vertical={false} strokeWidth={0.1}  />
                 <XAxis
                   dataKey="day"
-                  axisLine={false}
-                  tickLine={false}
+                  axisLine={true}
+                  tickLine={true}
                   tick={{ fontSize: 10 }} // ✅ smaller text on mobile
                   interval={0} // ✅ force show all labels
                   minTickGap={0} // ✅ no auto skipping
                 />
 
                 <YAxis
-                  axisLine={false}
+                  axisLine={true}
                   tickLine={false}
+                  allowDecimals={false}
                   tick={{ fontSize: 12 }}
                 />
                 <Tooltip

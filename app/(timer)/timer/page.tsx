@@ -127,7 +127,7 @@ const Page = () => {
       </motion.div>
 
       {/* Controls */}
-      <div className="flex justify-center gap-4 pb-8">
+      <div className="flex justify-center gap-4 pb-8 mt-10">
         <Button
           onClick={() => setStart((prev) => !prev)}
           variant={'primary'}
