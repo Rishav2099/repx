@@ -76,7 +76,7 @@ const LandingPage = () => {
 
       {/* Bottom Fixed CTA */}
       <div className="flex justify-evenly items-center border-t fixed bottom-0 w-full pb-8 pt-4 dark:bg-black/40 bg-white/40 backdrop-blur-md shadow-lg">
-        <Link href={"/sign-up"}>
+        <Link href={"/login"}>
           <Button className="cursor-pointer px-6" variant={"outline"}>
             Login
           </Button>

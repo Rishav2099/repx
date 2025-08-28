@@ -111,9 +111,9 @@ const SharePage = ({ params }: { params: Promise<{ id: string }> }) => {
 
   useEffect(() => {
     fetchWorkout();
-  });
+  }, [id]);
 
-  if (loading || !workout) {
+  if (loading) {
     return <div>Loading...</div>;
   }
 
