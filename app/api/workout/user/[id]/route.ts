@@ -12,9 +12,6 @@ export async function GET (req :NextRequest, {params}: {params: Promise<{id: str
       userId: id
     })
 
-    console.log(workouts);
-    
-
     if(!workouts){
       return new NextResponse("No workouts found for user", {status: 400})
     }

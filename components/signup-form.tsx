@@ -6,8 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React, { useState } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { signIn } from "next-auth/react";
+import { Loader } from "lucide-react";
 
 export function SignupForm({
   className,
@@ -16,6 +17,7 @@ export function SignupForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [isSubmitting, setisSubmitting] = useState(false);
   const [error, setError] = useState<string | null>("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -25,35 +27,39 @@ export function SignupForm({
       setError("All fields are required");
       return;
     }
-
     try {
-    const res = await axios.post("/api/auth/register", {
-      email,
-      name,
-      password,
-    });
-
-    console.log(res)
-
-     if (res.status === 201) {
-      // ✅ Auto-login the user using NextAuth
-      const result = await signIn("credentials", {
-        redirect: true,        // Redirect after login
+      setisSubmitting(true);
+      const res = await axios.post("/api/auth/register", {
         email,
+        name,
         password,
-        callbackUrl: "/",      // Change this to your dashboard or homepage
       });
 
-      // Optional: Handle login errors
-      if (result?.error) {
-        setError("Login failed after signup");
-      }
-    }
+      if (res.status === 201) {
+        // ✅ Auto-login the user using NextAuth
+        const result = await signIn("credentials", {
+          redirect: true,
+          email,
+          password,
+          callbackUrl: "/",
+        });
 
-    
-  } catch (err ) {
-    console.error("Signup error:", err);
-  }
+        // Optional: Handle login errors
+        if (result?.error) {
+          setError("Login failed after signup");
+        }
+      }
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        // ✅ AxiosError type safe
+        setError(err.response?.data?.error || "Something went wrong");
+      } else {
+        setError("Unexpected error occurred");
+      }
+      console.error("Signup error:", err);
+    } finally {
+      setisSubmitting(false);
+    }
   };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -105,24 +111,26 @@ export function SignupForm({
               <div>
                 <p className="text-rose-600">{error}</p>
               </div>
-              <Button type="submit" className="w-full">
-                Signup
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <span>Signup</span>
+                    <span>
+                      <Loader className="animate-spin" />
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    <span>Signup</span>
+                  </>
+                )}
               </Button>
               <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-card text-muted-foreground relative z-10 px-2">
                   Or continue with
                 </span>
               </div>
-              <div className="grid grid-cols-3 gap-4">
-                <Button variant="outline" type="button" className="w-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path
-                      d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  <span className="sr-only">Login with Apple</span>
-                </Button>
+              <div className="grid grid-cols-2 gap-4">
                 <Button variant="outline" type="button" className="w-full">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path

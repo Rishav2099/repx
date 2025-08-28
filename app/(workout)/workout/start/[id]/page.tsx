@@ -12,6 +12,7 @@ import { Loader2, Play, Pause, ArrowLeft, ArrowRight } from "lucide-react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Loader from "@/components/loader";
 
 interface Exercise {
   name: string;
@@ -130,8 +131,8 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
 
   if (loading || !workout) {
     return (
-      <div className="flex items-center justify-center gap-2 h-full w-full">
-        Loading <Loader2 className="animate-spin" />
+        <div className="flex justify-center items-center h-screen">
+        <Loader />
       </div>
     );
   }

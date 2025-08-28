@@ -1,5 +1,6 @@
 "use client";
 
+import Loader from "@/components/loader";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -46,7 +47,9 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
   }, [id]);
 
   if (loading || !workout) {
-    return <div>Loading...</div>;
+    return    <div className="flex justify-center items-center h-screen">
+        <Loader />
+      </div>
   }
 
   return (

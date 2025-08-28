@@ -32,7 +32,10 @@ export default withAuth(
         if (
           pathname === "/" ||
           pathname === "/login" ||
-          pathname === "/sign-up"
+          pathname === "/sign-up"||
+          pathname === "/images/analysis.png" ||
+          pathname === "/images/add.png" ||
+          pathname === "/images/track.png" 
         ) {
           return true;
         }

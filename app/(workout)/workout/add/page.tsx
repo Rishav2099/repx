@@ -62,6 +62,8 @@ const Page = () => {
     },
   });
 
+  const {formState: {isSubmitting}} = form
+
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "exercises",
@@ -80,7 +82,7 @@ const Page = () => {
 
   return (
     <div className="pb-10">
-      <h1 className="text-center font-bold text-2xl py-4">Add Workout</h1>
+      <h1 className="text-center font-bold text-2xl py-4 ">Add Workout</h1>
       <Separator />
       <Form {...form}>
         <form
@@ -239,6 +241,8 @@ const Page = () => {
           <Button
             type="submit"
             variant={'primary'}
+            disabled={isSubmitting}
+            className=""
           >
             Submit
           </Button>

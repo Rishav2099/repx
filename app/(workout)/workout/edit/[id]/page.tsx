@@ -101,6 +101,8 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
     }
   };
 
+  const {formState: {isSubmitting}} = form
+
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "exercises",
@@ -286,6 +288,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
           <Button
             type="submit"
             variant={'primary'}
+            disabled={isSubmitting}
           >
             Submit
           </Button>
