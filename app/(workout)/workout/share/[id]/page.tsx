@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import Loader from "@/components/loader";
 
 // ======== Zod Schemas ========
 const exerciseSchema = z
@@ -113,8 +114,10 @@ const SharePage = ({ params }: { params: Promise<{ id: string }> }) => {
     fetchWorkout();
   }, [id]);
 
-  if (loading) {
-    return <div>Loading...</div>;
+  if (loading || !workout) {
+    return  <div className="flex justify-center items-center h-screen">
+        <Loader />
+      </div>;
   }
 
   return (
