@@ -3,6 +3,16 @@ import { Button } from "./ui/button";
 import Link from "next/link";
 import Image from "next/image";
 
+interface SectionProps {
+  title: string;
+  image: string;
+  heading: string;
+  text: string;
+  buttonText: string;
+  link: string;
+  reverse?: boolean; // optional
+}
+
 const LandingPage = () => {
   return (
     <>
@@ -82,7 +92,7 @@ const LandingPage = () => {
 };
 
 /* Section Component */
-const Section = ({ title, image, heading, text, buttonText, link, reverse }) => {
+const Section: React.FC<SectionProps> = ({ title, image, heading, text, buttonText, link, reverse }) => {
   return (
     <div className="max-w-6xl mx-auto">
       <h2 className="text-center font-bold text-2xl md:text-3xl mb-12 tracking-tight">
