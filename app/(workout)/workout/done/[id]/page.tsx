@@ -47,9 +47,11 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
   }, [id]);
 
   if (loading || !workout) {
-    return    <div className="flex justify-center items-center h-screen">
+    return (
+      <div className="flex justify-center items-center h-screen">
         <Loader />
       </div>
+    );
   }
 
   return (

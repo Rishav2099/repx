@@ -24,6 +24,7 @@ import {
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import Loader from "@/components/loader";
 
 // ======== Zod Schemas ========
 const exerciseSchema = z
@@ -101,7 +102,9 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
     }
   };
 
-  const {formState: {isSubmitting}} = form
+  const {
+    formState: { isSubmitting },
+  } = form;
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -124,7 +127,11 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
   }, [id]);
 
   if (loading || !workout) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader />
+      </div>
+    );
   }
 
   return (
@@ -213,7 +220,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
 
                 {/* Conditional Fields */}
                 {watchType === "reps" &&
-                 (["reps", "sets"] as const).map((fieldName) => (
+                  (["reps", "sets"] as const).map((fieldName) => (
                     <FormField
                       key={fieldName}
                       control={form.control}
@@ -276,22 +283,18 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
 
           {/* Add Exercise */}
           <div className="flex gap-3">
-          <Button
-            type="button"
-            onClick={() => append({ name: "", type: "reps" })}
-            variant={'outline'}
-          >
-            + Add Exercise
-          </Button>
+            <Button
+              type="button"
+              onClick={() => append({ name: "", type: "reps" })}
+              variant={"outline"}
+            >
+              + Add Exercise
+            </Button>
 
-          {/* Submit */}
-          <Button
-            type="submit"
-            variant={'primary'}
-            disabled={isSubmitting}
-          >
-            Submit
-          </Button>
+            {/* Submit */}
+            <Button type="submit" variant={"primary"} disabled={isSubmitting}>
+              Submit
+            </Button>
           </div>
         </form>
       </Form>

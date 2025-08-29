@@ -1,6 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { connectToDatabase } from "./db";
+import GoogleProvider from "next-auth/providers/google";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 
@@ -47,8 +48,30 @@ export const authOptions: NextAuthOptions = {
         }
       },
     }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_ID ?? "",
+      clientSecret: process.env.GOOGLE_SECRET ?? "",
+    }),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      await connectToDatabase();
+      if (account?.provider === "google") {
+        // google login
+        let dbUser = await User.findOne({ email: user.email });
+        if (!dbUser) {
+          dbUser = await User.create({
+            email: user.email,
+            name: user.name || "unnamed",
+            googleId: user.id,
+          });
+        }
+        user.id = dbUser._id.toString();
+        return true;
+      }
+
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;

@@ -115,14 +115,18 @@ const SharePage = ({ params }: { params: Promise<{ id: string }> }) => {
   }, [id]);
 
   if (loading || !workout) {
-    return  <div className="flex justify-center items-center h-screen">
+    return (
+      <div className="flex justify-center items-center h-screen">
         <Loader />
-      </div>;
+      </div>
+    );
   }
 
   return (
     <div>
-      <h1 className="text-center font-bold text-2xl py-4">Save Shared Workout</h1>
+      <h1 className="text-center font-bold text-2xl py-4">
+        Save Shared Workout
+      </h1>
       <Separator />
       <Form {...form}>
         <form
@@ -247,11 +251,7 @@ const SharePage = ({ params }: { params: Promise<{ id: string }> }) => {
             );
           })}
 
-          <Button
-            type="submit"
-            variant='primary'
-            className="py-5"
-          >
+          <Button type="submit" variant="primary" className="py-5">
             Save Workout
           </Button>
         </form>
