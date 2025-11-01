@@ -2,21 +2,24 @@
 
 import FriendCard from "./FriendCard";
 
+interface User {
+  _id: string;
+  name: string;
+}
+
+interface Friend {
+  _id: string;
+  requester: User;
+  recipient: User;
+}
+
+interface FriendListData {
+  isError?: boolean;
+  friends: Friend[];
+}
+
 interface FriendListProps {
-  data: {
-    isError?: boolean;
-    friends?: {
-      _id: string
-      recipient: {
-        _id: string;
-        name: string
-      };
-      requester: {
-        _id: string;
-        name: string
-      }
-    }[];
-  };
+  data: FriendListData;
   userId: string;
 }
 
@@ -35,8 +38,7 @@ const FriendList = ({ data, userId }: FriendListProps) => {
       <h2 className="text-lg font-semibold mt-3 ml-3">Friends</h2>
       <div className="mt-5 w-[90vw] mx-auto flex flex-col gap-3">
         {data.friends.map((f) => {
-          const otherUser =
-            f.requester._id === userId ? f.recipient : f.requester;
+          const otherUser = f.requester._id === userId ? f.recipient : f.requester;
           return <FriendCard key={f._id} friend={otherUser} userId={userId} />;
         })}
       </div>
