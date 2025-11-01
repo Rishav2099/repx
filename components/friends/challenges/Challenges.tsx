@@ -37,21 +37,25 @@ const Challenges = () => {
   const [acceptedChallenges, setAcceptedChallenges] = useState<ChallengeProps[]>([]);
   const [pendingChallenges, setPendingChallenges] = useState<ChallengeProps[]>([]);
 
-  useEffect(() => {
-    if (!friends?.friends?.length) return;
 
-    const allChallenges = friends.friends.flatMap(
-      (friend: FriendProps) => friend.challenges || []
-    );
+useEffect(() => {
+  const list = Array.isArray(friends?.friends) ? friends.friends : [];
 
-    const accepted = allChallenges.filter((ch: { status: string; }) => ch.status === "accepted");
-    const pending = allChallenges.filter((ch: { status: string; }) => ch.status === "pending");
+  if (list.length === 0) return;
 
-    setAcceptedChallenges(accepted);
-    setPendingChallenges(pending);
+  const allChallenges = list.flatMap(
+    (friend: FriendProps) => friend.challenges || []
+  );
 
-    console.log("✅ allChallenges:", allChallenges);
-  }, [friends]);
+  const accepted = allChallenges.filter((ch) => ch.status === "accepted");
+  const pending = allChallenges.filter((ch) => ch.status === "pending");
+
+  setAcceptedChallenges(accepted);
+  setPendingChallenges(pending);
+
+  console.log("✅ allChallenges:", allChallenges);
+}, [friends]);
+
 
   if (acceptedChallenges.length === 0 && pendingChallenges.length === 0) {
     return (
