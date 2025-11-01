@@ -4,22 +4,48 @@ import { fetchFriendRequests, fetchFriends } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
 
+// ✅ Challenge type
+export interface ChallengeProps {
+  _id: string;
+  challengeName: string;
+  description: string;
+  status: "pending" | "accepted" | "rejected" | "completed";
+  challenger: { _id: string; name: string };
+  challengee: { _id: string; name: string };
+  forDays: number;
+  reps: number;
+  progress: {
+    challenger: string[];
+    challengee: string[];
+  };
+  startDate: string;
+  endDate: string;
+}
+
+// ✅ Friend type
+export interface FriendProps {
+  _id: string;
+  requester: { _id: string; name: string };
+  recipient: { _id: string; name: string };
+  status: "pending" | "accepted" | "rejected";
+  challenges?: ChallengeProps[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// ✅ Context type
 type FriendContextType = {
-  friends: any[];
-  requests: any[];
+  friends: FriendProps[];
+  requests: FriendProps[];
   isLoading: boolean;
   refetchFriends: () => void;
   refetchRequests: () => void;
-}
+};
 
 const FriendContext = createContext<FriendContextType | null>(null);
 
-export const FriendProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  const friendsQuery = useQuery({
+export const FriendProvider = ({ children }: { children: React.ReactNode }) => {
+  const friendsQuery = useQuery<FriendProps[]>({
     queryKey: ["friends"],
     queryFn: fetchFriends,
     staleTime: 1000 * 60 * 10,
@@ -29,7 +55,7 @@ export const FriendProvider = ({
     refetchOnReconnect: false,
   });
 
-  const requestsQuery = useQuery({
+  const requestsQuery = useQuery<FriendProps[]>({
     queryKey: ["friendRequests"],
     queryFn: fetchFriendRequests,
     staleTime: 1000 * 60 * 10,
@@ -39,19 +65,15 @@ export const FriendProvider = ({
     refetchOnReconnect: false,
   });
 
-  const value = {
-    friends: friendsQuery.data,
-    requests: requestsQuery.data,
+  const value: FriendContextType = {
+    friends: friendsQuery.data ?? [],
+    requests: requestsQuery.data ?? [],
     isLoading: friendsQuery.isLoading || requestsQuery.isLoading,
     refetchFriends: friendsQuery.refetch,
     refetchRequests: requestsQuery.refetch,
   };
 
-  return (
-    <FriendContext.Provider value={value}>
-      {children}
-    </FriendContext.Provider>
-  );
+  return <FriendContext.Provider value={value}>{children}</FriendContext.Provider>;
 };
 
 export const useFriend = () => {

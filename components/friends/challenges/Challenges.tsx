@@ -33,14 +33,15 @@ export interface FriendProps {
 
 
 const Challenges = () => {
-  const { friends } = useFriend();
+const { friends }: { friends: { friends: FriendProps[] } } = useFriend();
+
   const [acceptedChallenges, setAcceptedChallenges] = useState<ChallengeProps[]>([]);
   const [pendingChallenges, setPendingChallenges] = useState<ChallengeProps[]>([]);
 
 
 useEffect(() => {
   const list = Array.isArray(friends?.friends) ? friends.friends : [];
-
+console.log('hi',friends)
   if (list.length === 0) return;
 
   const allChallenges = list.flatMap(
