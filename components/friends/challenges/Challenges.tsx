@@ -31,15 +31,9 @@ export interface FriendProps {
   challenges?: ChallengeProps[];
 }
 
-// ✅ useFriend() expected shape
-interface UseFriendData {
-  friends: FriendProps[];
-  isLoading?: boolean;
-  isError?: boolean;
-}
 
 const Challenges = () => {
-  const { friends }: { friends: UseFriendData } = useFriend();
+  const { friends } = useFriend();
   const [acceptedChallenges, setAcceptedChallenges] = useState<ChallengeProps[]>([]);
   const [pendingChallenges, setPendingChallenges] = useState<ChallengeProps[]>([]);
 
@@ -50,8 +44,8 @@ const Challenges = () => {
       (friend: FriendProps) => friend.challenges || []
     );
 
-    const accepted = allChallenges.filter((ch) => ch.status === "accepted");
-    const pending = allChallenges.filter((ch) => ch.status === "pending");
+    const accepted = allChallenges.filter((ch: { status: string; }) => ch.status === "accepted");
+    const pending = allChallenges.filter((ch: { status: string; }) => ch.status === "pending");
 
     setAcceptedChallenges(accepted);
     setPendingChallenges(pending);

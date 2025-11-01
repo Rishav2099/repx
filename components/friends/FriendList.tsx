@@ -37,7 +37,7 @@ const FriendList = ({ data, userId }: FriendListProps) => {
     <>
       <h2 className="text-lg font-semibold mt-3 ml-3">Friends</h2>
       <div className="mt-5 w-[90vw] mx-auto flex flex-col gap-3">
-        {data.friends.map((f) => {
+        {data.friends.map((f: Friend) => {
           const otherUser =
             f.requester._id === userId ? f.recipient : f.requester;
           return <FriendCard key={f._id} friend={otherUser} userId={userId} />;
