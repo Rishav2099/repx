@@ -47,7 +47,7 @@ const Friends = () => {
           <FriendRequests data={requests} />
 
           {/* 👥 Friend List */}
-          <FriendList data={friends.friends} userId={userId} />
+          <FriendList data={friends} userId={userId} />
         </>
       )}
     </div>
