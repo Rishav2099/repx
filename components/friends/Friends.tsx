@@ -17,7 +17,7 @@ const Friends = () => {
   const {friends, requests, isLoading} = useFriend();
 
 
-  // 🌀 Show only ONE loader if any is loading
+  // 🌀 Show only ONE loader if it is loading
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-[60vh]">
@@ -47,7 +47,7 @@ const Friends = () => {
           <FriendRequests data={requests} />
 
           {/* 👥 Friend List */}
-          <FriendList data={friends} userId={userId} />
+          <FriendList data={{friends}} userId={userId} />
         </>
       )}
     </div>
