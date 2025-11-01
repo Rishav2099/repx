@@ -31,32 +31,30 @@ export interface FriendProps {
   challenges?: ChallengeProps[];
 }
 
-
 const Challenges = () => {
-const { friends }: { friends: { friends: FriendProps[] } } = useFriend();
+  // ✅ You don’t need custom destructuring here — context already gives a plain array
+  const { friends } = useFriend();
 
   const [acceptedChallenges, setAcceptedChallenges] = useState<ChallengeProps[]>([]);
   const [pendingChallenges, setPendingChallenges] = useState<ChallengeProps[]>([]);
 
+  useEffect(() => {
+    if (!Array.isArray(friends) || friends.length === 0) return;
 
-useEffect(() => {
-  const list = Array.isArray(friends?.friends) ? friends.friends : [];
-console.log('hi',friends)
-  if (list.length === 0) return;
+    console.log("hi", friends);
 
-  const allChallenges = list.flatMap(
-    (friend: FriendProps) => friend.challenges || []
-  );
+    const allChallenges = friends.flatMap(
+      (friend: FriendProps) => friend.challenges || []
+    );
 
-  const accepted = allChallenges.filter((ch) => ch.status === "accepted");
-  const pending = allChallenges.filter((ch) => ch.status === "pending");
+    const accepted = allChallenges.filter((ch) => ch.status === "accepted");
+    const pending = allChallenges.filter((ch) => ch.status === "pending");
 
-  setAcceptedChallenges(accepted);
-  setPendingChallenges(pending);
+    setAcceptedChallenges(accepted);
+    setPendingChallenges(pending);
 
-  console.log("✅ allChallenges:", allChallenges);
-}, [friends]);
-
+    console.log("✅ allChallenges:", allChallenges);
+  }, [friends]);
 
   if (acceptedChallenges.length === 0 && pendingChallenges.length === 0) {
     return (
