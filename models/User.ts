@@ -23,6 +23,10 @@ const userSchema: Schema = new Schema(
         ref: "DoneWorkout",
       },
     ],
+    friends: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Friend'
+    }]
   },
   { timestamps: true }
 );

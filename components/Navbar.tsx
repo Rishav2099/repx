@@ -1,6 +1,6 @@
 "use client";
 
-import { ChartLine, CirclePlus, Home, Timer } from "lucide-react";
+import { ChartLine, CirclePlus, Home, Timer, Users } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
@@ -12,7 +12,11 @@ const Navbar = () => {
 
   const hideNavbarPaths = ["/login", "/register"];
 
-  if ((pathname.startsWith("/workout") && pathname != '/workout/add') || !session || hideNavbarPaths.includes(pathname)) {
+  if (
+    (pathname.startsWith("/workout") && pathname != "/workout/add") || pathname.startsWith("/friends/preview/") ||
+    !session ||
+    hideNavbarPaths.includes(pathname)
+  ) {
     return null;
   }
 
@@ -31,7 +35,29 @@ const Navbar = () => {
           <Home />
           <span>Home</span>
         </li>
+        <li
+          className={`flex flex-col items-center cursor-pointer ${
+            isActive("/friends")
+              ? "text-red-600 font-semibold"
+              : "text-gray-600"
+          }`}
+          onClick={() => router.push("/friends")}
+        >
+          <Users />
+          <span>Friends</span>
+        </li>
 
+        <li
+          className={`flex flex-col items-center cursor-pointer ${
+            isActive("/workout/add")
+              ? "text-red-600 font-semibold"
+              : "text-gray-600"
+          }`}
+          onClick={() => router.push("/workout/add")}
+        >
+          <CirclePlus />
+          <span>Add</span>
+        </li>
         <li
           className={`flex flex-col items-center cursor-pointer ${
             isActive("/track") ? "text-red-600 font-semibold" : "text-gray-600"
@@ -40,16 +66,6 @@ const Navbar = () => {
         >
           <ChartLine />
           <span>Track</span>
-        </li>
-
-        <li
-          className={`flex flex-col items-center cursor-pointer ${
-            isActive("/workout/add") ? "text-red-600 font-semibold" : "text-gray-600"
-          }`}
-          onClick={() => router.push("/workout/add")}
-        >
-          <CirclePlus />
-          <span>Add</span>
         </li>
 
         <li
