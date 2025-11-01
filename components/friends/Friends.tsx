@@ -14,8 +14,7 @@ const Friends = () => {
   const { data: session } = useSession();
   const userId = String(session?.user?.id ?? "");
   const [showSearch, setShowSearch] = useState(false);
-  const {friends, requests, isLoading} = useFriend();
-
+  const { friends, requests, isLoading } = useFriend();
 
   // 🌀 Show only ONE loader if any is loading
   if (isLoading) {
@@ -47,7 +46,7 @@ const Friends = () => {
           <FriendRequests data={requests} />
 
           {/* 👥 Friend List */}
-          <FriendList data={friends} userId={userId} />
+          <FriendList friends={friends} userId={userId} />
         </>
       )}
     </div>
