@@ -5,7 +5,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "../ui/button";
 import ChallengeForm from "./challenges/ChallengeForm";
 
-const FriendCard = ({ friend, userId }: { friend: any; userId: string }) => {
+interface friendProps {
+  name: string;
+  _id: string
+}
+
+const FriendCard = ({ friend, userId }: { friend: friendProps; userId: string }) => {
   const [open, setOpen] = useState(false);
 
   return (

@@ -4,7 +4,6 @@ import Loader from "@/components/loader";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import axios from "axios";
-import { EllipsisVertical, Loader2 } from "lucide-react";
 import Link from "next/link";
 import React, { use, useEffect, useState } from "react";
 

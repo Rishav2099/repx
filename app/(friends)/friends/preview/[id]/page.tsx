@@ -32,7 +32,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
 
   useEffect(() => {
     fetchFriend();
-  }, []);
+  }, [id]);
 
   if (loading) {
     return (

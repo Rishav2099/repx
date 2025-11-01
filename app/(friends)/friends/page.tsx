@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Share2 } from "lucide-react";
 import React, { useState } from "react";
 
-const page = () => {
+const Page = () => {
   const [nav, setNav] = useState("friends");
 
   return (
@@ -42,4 +42,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

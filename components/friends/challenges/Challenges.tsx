@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import PendingChallenges from "./PendingChallenges";
 import AcceptedChallenge from "./AcceptedChallenge";
 
+// Define Challenge structure
 export interface ChallengeProps {
   _id: string;
   challengeName: string;
@@ -14,29 +15,34 @@ export interface ChallengeProps {
   challengee: { _id: string; name: string };
   forDays: number;
   reps: number;
-  progress : {
-    challenger : string[];
+  progress: {
+    challenger: string[];
     challengee: string[];
   };
   startDate: string;
   endDate: string;
 }
 
+// Define Friend structure
+export interface FriendProps {
+  _id: string;
+  requester: { _id: string; name: string };
+  recipient: { _id: string; name: string };
+  challenges?: ChallengeProps[];
+}
+
+// Component
 const Challenges = () => {
   const { friends } = useFriend();
-  const [acceptedChallenges, setAcceptedChallenges] = useState<
-    ChallengeProps[]
-  >([]);
-  const [pendingChallenges, setPendingChallenges] = useState<ChallengeProps[]>(
-    []
-  );
+  const [acceptedChallenges, setAcceptedChallenges] = useState<ChallengeProps[]>([]);
+  const [pendingChallenges, setPendingChallenges] = useState<ChallengeProps[]>([]);
 
   useEffect(() => {
     if (!friends?.friends?.length) return;
 
     // ✅ flatten all challenges from each friend
     const allChallenges = friends.friends.flatMap(
-      (friend: any) => friend.challenges || []
+      (friend: FriendProps) => friend.challenges || []
     );
 
     // ✅ Separate based on status
@@ -52,7 +58,7 @@ const Challenges = () => {
   }, [friends]);
 
   // 🧩 UI rendering
-  if (acceptedChallenges.length == 0 && pendingChallenges.length == 0) {
+  if (acceptedChallenges.length === 0 && pendingChallenges.length === 0) {
     return (
       <div>
         <h2 className="text-xl font-semibold mb-4 text-center">Challenges</h2>
@@ -72,12 +78,8 @@ const Challenges = () => {
 
       {/* Accepted */}
       {acceptedChallenges.length > 0 && (
-        <>
         <AcceptedChallenge acceptedChallenges={acceptedChallenges} />
-        </>
       )}
-
-      
     </div>
   );
 };
