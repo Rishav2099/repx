@@ -22,7 +22,6 @@ interface FriendRequestsProps {
   data: {
     isError?: boolean;
     length?: number;
-    map?: any;
   } & FriendRequest[];
 }
 
@@ -39,7 +38,7 @@ const FriendRequests = ({ data }: FriendRequestsProps) => {
     }
   };
 
-  if ((data as any)?.isError) return <p>Error loading friend requests</p>;
+  if ((data)?.isError) return <p>Error loading friend requests</p>;
 
   if (!data?.length) return null;
 
