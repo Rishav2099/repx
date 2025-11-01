@@ -34,7 +34,6 @@ export interface FriendProps {
 // ✅ useFriend() expected shape
 interface UseFriendData {
   friends: FriendProps[];
-  requests?: any[];
   isLoading?: boolean;
   isError?: boolean;
 }
