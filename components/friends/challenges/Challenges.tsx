@@ -5,7 +5,6 @@ import React, { useEffect, useState } from "react";
 import PendingChallenges from "./PendingChallenges";
 import AcceptedChallenge from "./AcceptedChallenge";
 
-// ✅ Challenge type
 export interface ChallengeProps {
   _id: string;
   challengeName: string;
@@ -23,7 +22,6 @@ export interface ChallengeProps {
   endDate: string;
 }
 
-// ✅ Friend type
 export interface FriendProps {
   _id: string;
   requester: { _id: string; name: string };
@@ -31,32 +29,30 @@ export interface FriendProps {
   challenges?: ChallengeProps[];
 }
 
-
 const Challenges = () => {
-const { friends } = useFriend();
+  const { friends }: { friends: { friends: FriendProps[] } } = useFriend();
 
   const [acceptedChallenges, setAcceptedChallenges] = useState<ChallengeProps[]>([]);
   const [pendingChallenges, setPendingChallenges] = useState<ChallengeProps[]>([]);
 
+  useEffect(() => {
+    const list = Array.isArray(friends?.friends) ? friends.friends : [];
+    console.log("🔥 friends from context:", friends);
 
-useEffect(() => {
-  const list = Array.isArray(friends?.friends) ? friends.friends : [];
-console.log('hi',friends)
-  if (list.length === 0) return;
+    if (list.length === 0) return;
 
-  const allChallenges = list.flatMap(
-    (friend: FriendProps) => friend.challenges || []
-  );
+    const allChallenges = list.flatMap(
+      (friend: FriendProps) => friend.challenges || []
+    );
 
-  const accepted = allChallenges.filter((ch) => ch.status === "accepted");
-  const pending = allChallenges.filter((ch) => ch.status === "pending");
+    const accepted = allChallenges.filter((ch) => ch.status === "accepted");
+    const pending = allChallenges.filter((ch) => ch.status === "pending");
 
-  setAcceptedChallenges(accepted);
-  setPendingChallenges(pending);
+    setAcceptedChallenges(accepted);
+    setPendingChallenges(pending);
 
-  console.log("✅ allChallenges:", allChallenges);
-}, [friends]);
-
+    console.log("✅ allChallenges:", allChallenges);
+  }, [friends]);
 
   if (acceptedChallenges.length === 0 && pendingChallenges.length === 0) {
     return (
@@ -82,4 +78,4 @@ console.log('hi',friends)
   );
 };
 
-export default Challenges;  
+export default Challenges;
