@@ -14,8 +14,14 @@ const challengeSchema = new Schema(
     // wheter other user has accepted this challenge or not
     status: {
       type: String,
-      enum: ["pending", "accepted", "rejected", "completed"],
+      enum: ["pending", "accepted", "rejected", "completed", "resigned"],
       default: "pending",
+    },
+
+    resignedBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
     },
 
     challenger: {

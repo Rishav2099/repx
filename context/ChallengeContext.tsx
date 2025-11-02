@@ -27,7 +27,7 @@ export interface FriendProps {
   _id: string;
   requester: { _id: string; name: string };
   recipient: { _id: string; name: string };
-  status: "pending" | "accepted" | "rejected";
+  status: "pending" | "accepted" | "rejected" | 'resigned';
   challenges?: ChallengeProps[];
   createdAt?: string;
   updatedAt?: string;
