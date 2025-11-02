@@ -40,6 +40,7 @@ const AcceptedChallenge = ({ acceptedChallenges }: AcceptedChallengeProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogAction, setDialogAction] = useState<"resign" | "delete" | null>(null);
   const [dialogChallengeId, setDialogChallengeId] = useState<string | null>(null);
+  const [isSubmitting , setIsSubmitting ] = useState(false)
 
   // Handlers
   const openDialog = (action: "resign" | "delete", id: string) => {
@@ -52,6 +53,7 @@ const AcceptedChallenge = ({ acceptedChallenges }: AcceptedChallengeProps) => {
     if (!dialogChallengeId || !dialogAction) return;
 
     try {
+      setIsSubmitting(true);
       const url =
         dialogAction === "resign"
           ? `/api/challenges/${dialogChallengeId}/resign`
@@ -78,7 +80,8 @@ const AcceptedChallenge = ({ acceptedChallenges }: AcceptedChallengeProps) => {
       setDialogOpen(false);
       setDialogAction(null);
       setDialogChallengeId(null);
-    }
+      setIsSubmitting(false)
+    } 
   };
 
   return (
@@ -163,7 +166,7 @@ const AcceptedChallenge = ({ acceptedChallenges }: AcceptedChallengeProps) => {
                   <DropdownMenuContent align="end">
                     {canResign && (
                       <DropdownMenuItem
-                        className="text-orange-500"
+                        className="text-orange-500 font-semibold"
                         onSelect={() => openDialog("resign", ch._id)}
                       >
                         Resign
@@ -171,7 +174,7 @@ const AcceptedChallenge = ({ acceptedChallenges }: AcceptedChallengeProps) => {
                     )}
                     {canDelete && (
                       <DropdownMenuItem
-                        className="text-red-500"
+                        className="text-red-500 font-semibold"
                         onSelect={() => openDialog("delete", ch._id)}
                       >
                         {ch.status === "resigned"
@@ -204,7 +207,7 @@ const AcceptedChallenge = ({ acceptedChallenges }: AcceptedChallengeProps) => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirm}>
+            <AlertDialogAction disabled={isSubmitting} onClick={handleConfirm} className="font-semibold ">
               {dialogAction === "resign" ? "Resign" : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -2,35 +2,46 @@
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 
 const Page = () => {
   const [time, setTime] = useState(0);
   const [start, setStart] = useState(false);
-  const [mode, setMode] = useState<"timer" | "stopwatch">("stopwatch");
+  const [mode, setMode] = useState<"timer" | "stopwatch">("timer");
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
+  const beepPlayedRef = useRef(false); // Track beep outside render
 
   useEffect(() => {
     let id: NodeJS.Timeout | null = null;
+    beepPlayedRef.current = false; // Reset beep flag when mode/start changes
 
-    if (start && mode === "stopwatch") {
+    if (!start) return;
+
+    if (mode === "stopwatch") {
       id = setInterval(() => {
         setTime((prev) => prev + 1);
       }, 1000);
     }
 
-    if (start && mode === "timer") {
+    if (mode === "timer") {
       id = setInterval(() => {
         setTime((prev) => {
-          if (prev > 0) {
-            return prev - 1;
-          } else {
+          if (prev <= 0) {
             clearInterval(id!);
             setStart(false);
             return 0;
           }
+
+          // Play beep only once at 5 seconds
+          if (prev === 5 && !beepPlayedRef.current) {
+            const beep = new Audio("/sounds/beep.mp3");
+            beep.play().catch(() => {}); // Ignore autoplay errors
+            beepPlayedRef.current = true;
+          }
+
+          return prev - 1;
         });
       }, 1000);
     }
@@ -50,12 +61,14 @@ const Page = () => {
   const resetTime = () => {
     setTime(0);
     setStart(false);
+    beepPlayedRef.current = false;
   };
 
   const setTimer = () => {
-    const total = minutes * 60 + seconds;
+    const total = Math.max(0, minutes * 60 + seconds);
     setTime(total);
     setStart(false);
+    beepPlayedRef.current = false;
   };
 
   return (

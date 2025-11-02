@@ -85,12 +85,12 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
           }
 
           // play sound in last 3 seconds
-          if(prev <= 5 && !beepPlayed){
-            const beep = new Audio('/sounds/beep.mp3');
-            beep.play()
-            beepPlayed = true
+          if (prev <= 5 && !beepPlayed) {
+            const beep = new Audio("/sounds/beep.mp3");
+            beep.play();
+            beepPlayed = true;
           }
-         
+
           return prev - 1;
         });
       }, 1000);
@@ -131,7 +131,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
 
   if (loading || !workout) {
     return (
-        <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center h-screen">
         <Loader />
       </div>
     );
