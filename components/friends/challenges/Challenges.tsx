@@ -30,29 +30,30 @@ export interface FriendProps {
 }
 
 const Challenges = () => {
-  const { friends }: { friends: { friends: FriendProps[] } } = useFriend();
+  const { friends, isLoading } = useFriend();
 
-  const [acceptedChallenges, setAcceptedChallenges] = useState<ChallengeProps[]>([]);
-  const [pendingChallenges, setPendingChallenges] = useState<ChallengeProps[]>([]);
+  const [acceptedChallenges, setAcceptedChallenges] = useState<
+    ChallengeProps[]
+  >([]);
+  const [pendingChallenges, setPendingChallenges] = useState<ChallengeProps[]>(
+    []
+  );
 
   useEffect(() => {
-    const list = Array.isArray(friends?.friends) ? friends.friends : [];
-    console.log("🔥 friends from context:", friends);
+    const list = Array.isArray(friends) ? friends : [];
 
     if (list.length === 0) return;
 
-    const allChallenges = list.flatMap(
-      (friend: FriendProps) => friend.challenges || []
-    );
+    const allChallenges = list.flatMap((friend) => friend.challenges || []);
 
     const accepted = allChallenges.filter((ch) => ch.status === "accepted");
     const pending = allChallenges.filter((ch) => ch.status === "pending");
 
     setAcceptedChallenges(accepted);
     setPendingChallenges(pending);
-
-    console.log("✅ allChallenges:", allChallenges);
   }, [friends]);
+
+  if (isLoading) return <p>Loading challenges...</p>;
 
   if (acceptedChallenges.length === 0 && pendingChallenges.length === 0) {
     return (

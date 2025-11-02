@@ -45,7 +45,7 @@ type FriendContextType = {
 const FriendContext = createContext<FriendContextType | null>(null);
 
 export const FriendProvider = ({ children }: { children: React.ReactNode }) => {
-  const friendsQuery = useQuery<FriendProps[]>({
+  const friendsQuery = useQuery<{friends: FriendProps[]}>({
     queryKey: ["friends"],
     queryFn: fetchFriends,
     staleTime: 1000 * 60 * 10,
@@ -66,7 +66,7 @@ export const FriendProvider = ({ children }: { children: React.ReactNode }) => {
   });
 
   const value: FriendContextType = {
-    friends: friendsQuery.data ?? [],
+    friends: friendsQuery.data?.friends ?? [],
     requests: requestsQuery.data ?? [],
     isLoading: friendsQuery.isLoading || requestsQuery.isLoading,
     refetchFriends: friendsQuery.refetch,
