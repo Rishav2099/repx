@@ -9,7 +9,7 @@ export interface ChallengeProps {
   _id: string;
   challengeName: string;
   description: string;
-  status: "pending" | "accepted" | "rejected" | "completed";
+  status: "pending" | "accepted" | "rejected" | "completed" | 'resigned';
   challenger: { _id: string; name: string };
   challengee: { _id: string; name: string };
   forDays: number;
@@ -27,7 +27,7 @@ export interface FriendProps {
   _id: string;
   requester: { _id: string; name: string };
   recipient: { _id: string; name: string };
-  status: "pending" | "accepted" | "rejected" | 'resigned';
+  status: "pending" | "accepted" | "rejected";
   challenges?: ChallengeProps[];
   createdAt?: string;
   updatedAt?: string;

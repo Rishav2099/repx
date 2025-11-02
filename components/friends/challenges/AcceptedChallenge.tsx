@@ -70,9 +70,9 @@ const AcceptedChallenge = ({ acceptedChallenges }: AcceptedChallengeProps) => {
       );
 
       queryClient.invalidateQueries({ queryKey: ["friends"] });
-    } catch (error: any) {
+    } catch (error) {
       // Axios error handling
-      const message = error.response?.data?.message || error.message || "Something went wrong";
+      const message = "Something went wrong";
       toast.error(message);
     } finally {
       setDialogOpen(false);
