@@ -12,11 +12,11 @@ const AcceptedChallenge = ({ acceptedChallenges }: AcceptedChallengeProps) => {
       {acceptedChallenges.map((ch) => (
         <div
           key={ch._id}
-          className="flex flex-col justify-center items-center bg-[#1a1a1a] w-[80vw] max-w-[800px] py-5 rounded-lg"
+          className="flex flex-col justify-center items-center bg-[#1a1a1a] md:w-[80vw] w-[90vw] md:max-w-[800px] py-5 rounded-lg"
         >
           <div className="grid grid-cols-3 place-items-center w-full">
             {/* Left */}
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center justify-center">
               <ProgressAvatar
                 progress={Number(((ch.progress?.challenger?.length / ch.forDays) * 100).toFixed(1))}
                 name="CN"
@@ -31,7 +31,7 @@ const AcceptedChallenge = ({ acceptedChallenges }: AcceptedChallengeProps) => {
             </h3>
 
             {/* Right */}
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center justify-center">
             <ProgressAvatar
               progress={Number(((ch.progress?.challengee?.length / ch.forDays) * 100).toFixed(1))}
               name="CN"

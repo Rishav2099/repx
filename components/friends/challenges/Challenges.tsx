@@ -66,7 +66,7 @@ const Challenges = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4 text-center">Challenges</h2>
+      <h2 className="text-xl font-semibold my-4 text-center">Challenges</h2>
 
       {pendingChallenges.length > 0 && (
         <PendingChallenges pendingChallenges={pendingChallenges} />
