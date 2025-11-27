@@ -68,7 +68,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isPaused, exerciseBreak]);
+  }, [isPaused]);
 
   // Break timer
   useEffect(() => {
