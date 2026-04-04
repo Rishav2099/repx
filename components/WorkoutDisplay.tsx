@@ -1,26 +1,29 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, Dumbbell, Calendar } from "lucide-react";
 
-interface Exercise {
+// 1. We define the "Perfect" types here.
+export interface CleanExercise {
+  id: string;
   name: string;
   reps: number;
   sets: number;
-  _id: { $oid: string };
 }
 
-interface WorkoutProps {
-  workout: {
-    _id: { $oid: string };
-    workoutName: string;
-    duration: number;
-    exercises: Exercise[];
-    createdAt: { $date: string };
-  };
+export interface CleanWorkout {
+  id: string;
+  workoutName: string;
+  duration: number;
+  exercises: CleanExercise[];
+  createdAt: Date; // A real, pure JavaScript Date object
+}
+
+export interface WorkoutProps {
+  workout: CleanWorkout;
 }
 
 export default function WorkoutDisplay({ workout }: WorkoutProps) {
-  // Format the date to something readable like "Aug 19, 2025"
-  const date = new Date(workout.createdAt.$date).toLocaleDateString("en-US", {
+  // Since createdAt is already a Date object, formatting is incredibly easy
+  const date = workout.createdAt.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -54,13 +57,15 @@ export default function WorkoutDisplay({ workout }: WorkoutProps) {
           </h4>
           <div className="grid grid-cols-1 gap-2">
             {workout.exercises.map((ex, index) => (
-              <div 
-                key={ex._id.$oid + index} 
+              <div
+                // Use the clean ID
+                key={ex.id + index}
                 className="flex justify-between items-center bg-muted/30 p-2 rounded-md text-sm"
               >
                 <span className="font-medium capitalize">{ex.name}</span>
                 <span className="text-muted-foreground">
-                  <span className="font-bold text-foreground">{ex.sets}</span> sets × <span className="font-bold text-foreground">{ex.reps}</span> reps
+                  <span className="font-bold text-foreground">{ex.sets}</span> sets ×{" "}
+                  <span className="font-bold text-foreground">{ex.reps}</span> reps
                 </span>
               </div>
             ))}

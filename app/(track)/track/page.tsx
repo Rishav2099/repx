@@ -1,20 +1,26 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { useTheme } from "next-themes";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import WorkoutDisplay from "@/components/WorkoutDisplay";
+import WorkoutDisplay, { CleanWorkout } from "@/components/WorkoutDisplay";
 
 // --- Types ---
-type Workout = {
+// This represents the messy data exactly as it comes from your API/MongoDB
+type RawWorkout = {
   _id: { $oid: string } | string;
   workoutName: string;
   createdAt: { $date: string } | string;
   duration: number;
-  exercises: unknown[];
+  exercises: {
+    _id: { $oid: string } | string;
+    name: string;
+    reps: number;
+    sets: number;
+  }[];
 };
 
 const MONTHS = [
@@ -23,7 +29,8 @@ const MONTHS = [
 ];
 
 export default function WorkoutAnalysis() {
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
+  // We strictly tell React: "Only store CLEAN workouts in this state"
+  const [workouts, setWorkouts] = useState<CleanWorkout[]>([]);
   const { theme } = useTheme();
   
   // States for filtering
@@ -33,7 +40,29 @@ export default function WorkoutAnalysis() {
   const fetchWorkouts = async () => {
     try {
       const res = await axios.get("/api/workout/store");
-      setWorkouts(res.data.workouts || []);
+      const rawData: RawWorkout[] = res.data.workouts || [];
+
+      // THE ADAPTER: Clean the data immediately!
+      const cleanData: CleanWorkout[] = rawData.map((w) => {
+        // Extract dates safely
+        const dateString = typeof w.createdAt === 'string' ? w.createdAt : w.createdAt.$date;
+        
+        return {
+          id: typeof w._id === 'string' ? w._id : w._id.$oid,
+          workoutName: w.workoutName,
+          duration: w.duration,
+          createdAt: new Date(dateString), // Convert to real JS Date object
+          exercises: w.exercises.map(ex => ({
+            id: typeof ex._id === 'string' ? ex._id : ex._id.$oid,
+            name: ex.name,
+            reps: ex.reps,
+            sets: ex.sets,
+          }))
+        };
+      });
+
+      // Save the cleaned data to state
+      setWorkouts(cleanData);
     } catch (error) {
       console.error("Error fetching workouts", error);
     }
@@ -43,23 +72,18 @@ export default function WorkoutAnalysis() {
     fetchWorkouts();
   }, []);
 
-  // Generate Year Range from Data
+  // Generate Year Range from CLEAN Data
   const availableYears = useMemo(() => {
     if (workouts.length === 0) return [new Date().getFullYear()];
-    const years = workouts.map(w => {
-        const dateStr = typeof w.createdAt === 'string' ? w.createdAt : w.createdAt.$date;
-        return new Date(dateStr).getFullYear();
-    });
-    const uniqueYears = Array.from(new Set(years)).sort((a, b) => b - a); // Newest first
-    return uniqueYears;
+    const years = workouts.map(w => w.createdAt.getFullYear());
+    return Array.from(new Set(years)).sort((a, b) => b - a);
   }, [workouts]);
 
-  // Filtering Logic: Match both Month and Year
+  // Filtering Logic: Match both Month and Year using CLEAN Data
   const filteredWorkouts = useMemo(() => {
     return workouts.filter((w) => {
-      const dateStr = typeof w.createdAt === 'string' ? w.createdAt : w.createdAt.$date;
-      const d = new Date(dateStr);
-      return d.getFullYear() === activeYear && d.getMonth() === activeMonth;
+      // Much simpler because w.createdAt is guaranteed to be a Date object!
+      return w.createdAt.getFullYear() === activeYear && w.createdAt.getMonth() === activeMonth;
     });
   }, [workouts, activeYear, activeMonth]);
 
@@ -71,7 +95,7 @@ export default function WorkoutAnalysis() {
         Repx Analysis
       </h1>
 
-      {/* 1. Chart Section */}
+      {/* Chart Section */}
       <Card className="w-full shadow-2xl rounded-3xl border-none bg-gradient-to-b from-background to-muted/20 mb-10">
         <CardHeader>
           <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Activity Snapshot</CardTitle>
@@ -106,10 +130,8 @@ export default function WorkoutAnalysis() {
         </CardContent>
       </Card>
 
-      {/* 2. Enhanced Navigation Section */}
+      {/* Navigation Section */}
       <div className="w-full space-y-6 mb-8">
-        
-        {/* Year Selector */}
         <div className="flex flex-col gap-2">
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground px-1">Select Year</span>
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
@@ -129,7 +151,6 @@ export default function WorkoutAnalysis() {
             </div>
         </div>
 
-        {/* Month Tabs */}
         <div className="flex flex-col gap-2">
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground px-1">Select Month</span>
             <Tabs value={activeMonth.toString()} onValueChange={(v) => setActiveMonth(parseInt(v))} className="w-full">
@@ -148,7 +169,7 @@ export default function WorkoutAnalysis() {
         </div>
       </div>
 
-      {/* 3. Filtered Workouts List */}
+      {/* Filtered Workouts List */}
       <div className="w-full space-y-4">
         <div className="flex justify-between items-end px-1 mb-2">
           <h3 className="font-black text-2xl uppercase italic tracking-tighter">
@@ -163,8 +184,9 @@ export default function WorkoutAnalysis() {
           <div className="grid gap-4">
              {filteredWorkouts.map((workout) => (
                 <WorkoutDisplay 
-                  key={typeof workout._id === 'string' ? workout._id : workout._id.$oid} 
-                  workout={workout as any} 
+                  // Because we mapped the data, it's just 'workout.id' now!
+                  key={workout.id} 
+                  workout={workout}
                 />
               ))}
           </div>
@@ -178,8 +200,8 @@ export default function WorkoutAnalysis() {
   );
 }
 
-// Keep your getCurrentWeekDays function logic here...
-const getCurrentWeekDays = (workouts: Workout[]) => {
+// Chart Logic updated to use the CLEAN data
+const getCurrentWeekDays = (workouts: CleanWorkout[]) => {
     const today = new Date();
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - today.getDay());
@@ -188,11 +210,12 @@ const getCurrentWeekDays = (workouts: Workout[]) => {
     return Array.from({ length: 7 }).map((_, i) => {
       const d = new Date(startOfWeek);
       d.setDate(startOfWeek.getDate() + i);
+      
       const count = workouts.filter(w => {
-        const dateStr = typeof w.createdAt === 'string' ? w.createdAt : w.createdAt.$date;
-        const wd = new Date(dateStr);
-        return wd.toDateString() === d.toDateString();
+        // Look how clean this is compared to the old string checking!
+        return w.createdAt.toDateString() === d.toDateString();
       }).length;
+      
       return { day: d.toLocaleDateString("en-US", { weekday: "short" }), value: count };
     });
 };
