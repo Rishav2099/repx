@@ -173,7 +173,6 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
     const exercisesToSave = doneWorkout ? doneWorkout.exercises : [];
     
     if (exercisesToSave.length === 0) {
-      // If they haven't completed anything, just go back to home/track
       router.push("/track"); 
     } else {
       storeWorkout(exercisesToSave);
@@ -333,7 +332,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
             </div>
             <h3 className="font-black text-2xl mb-2">Finish Workout?</h3>
             <p className="text-muted-foreground font-medium mb-6 leading-relaxed">
-              Are you sure you want to end your workout early? Only the exercises you have marked as 'Done' will be saved to your history.
+              Are you sure you want to end your workout early? Only the exercises you have marked as Done will be saved to your history.
             </p>
             <div className="flex gap-3">
               <Button variant="secondary" className="flex-1 h-12 rounded-xl font-bold" onClick={() => setShowEndDialog(false)}>
