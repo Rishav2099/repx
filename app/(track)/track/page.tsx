@@ -7,9 +7,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WorkoutDisplay, { CleanWorkout } from "@/components/WorkoutDisplay";
+import Loader from "@/components/loader"; // Make sure this path matches your file structure!
 
-// --- Types ---
-// This represents the messy data exactly as it comes from your API/MongoDB
 type RawWorkout = {
   _id: { $oid: string } | string;
   workoutName: string;
@@ -29,29 +28,47 @@ const MONTHS = [
 ];
 
 export default function WorkoutAnalysis() {
-  // We strictly tell React: "Only store CLEAN workouts in this state"
-  const [workouts, setWorkouts] = useState<CleanWorkout[]>([]);
   const { theme } = useTheme();
   
-  // States for filtering
+  // States
   const [activeYear, setActiveYear] = useState<number>(new Date().getFullYear());
   const [activeMonth, setActiveMonth] = useState<number>(new Date().getMonth());
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // We use a dictionary cache to store workouts by "YYYY-MM" so we don't refetch
+  const [workoutCache, setWorkoutCache] = useState<Record<string, CleanWorkout[]>>({});
 
-  const fetchWorkouts = async () => {
+  // Generate dynamic years (e.g., this year and the last 2 years)
+  // Since we fetch lazily now, we shouldn't rely on data to know what years exist
+  const availableYears = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    return [currentYear, currentYear - 1, currentYear - 2];
+  }, []);
+
+  const fetchWorkoutsForPeriod = async (year: number, month: number) => {
+    const cacheKey = `${year}-${month}`;
+    
+    // If we already have the data for this month/year, don't fetch again!
+    if (workoutCache[cacheKey]) {
+      return; 
+    }
+
+    setIsLoading(true);
     try {
-      const res = await axios.get("/api/workout/store");
+      // Pass year and month as query parameters to your API
+      const res = await axios.get("/api/workout/store", {
+        params: { year, month } 
+      });
+      
       const rawData: RawWorkout[] = res.data.workouts || [];
 
-      // THE ADAPTER: Clean the data immediately!
       const cleanData: CleanWorkout[] = rawData.map((w) => {
-        // Extract dates safely
         const dateString = typeof w.createdAt === 'string' ? w.createdAt : w.createdAt.$date;
-        
         return {
           id: typeof w._id === 'string' ? w._id : w._id.$oid,
           workoutName: w.workoutName,
           duration: w.duration,
-          createdAt: new Date(dateString), // Convert to real JS Date object
+          createdAt: new Date(dateString),
           exercises: w.exercises.map(ex => ({
             id: typeof ex._id === 'string' ? ex._id : ex._id.$oid,
             name: ex.name,
@@ -61,33 +78,32 @@ export default function WorkoutAnalysis() {
         };
       });
 
-      // Save the cleaned data to state
-      setWorkouts(cleanData);
+      // Save to cache
+      setWorkoutCache(prev => ({
+        ...prev,
+        [cacheKey]: cleanData
+      }));
     } catch (error) {
       console.error("Error fetching workouts", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // Fetch data whenever the user changes the Year or Month tab
   useEffect(() => {
-    fetchWorkouts();
-  }, []);
+    fetchWorkoutsForPeriod(activeYear, activeMonth);
+  }, [activeYear, activeMonth]);
 
-  // Generate Year Range from CLEAN Data
-  const availableYears = useMemo(() => {
-    if (workouts.length === 0) return [new Date().getFullYear()];
-    const years = workouts.map(w => w.createdAt.getFullYear());
-    return Array.from(new Set(years)).sort((a, b) => b - a);
-  }, [workouts]);
-
-  // Filtering Logic: Match both Month and Year using CLEAN Data
+  // Pull the current data to display directly from our cache
   const filteredWorkouts = useMemo(() => {
-    return workouts.filter((w) => {
-      // Much simpler because w.createdAt is guaranteed to be a Date object!
-      return w.createdAt.getFullYear() === activeYear && w.createdAt.getMonth() === activeMonth;
-    });
-  }, [workouts, activeYear, activeMonth]);
+    const cacheKey = `${activeYear}-${activeMonth}`;
+    return workoutCache[cacheKey] || [];
+  }, [workoutCache, activeYear, activeMonth]);
 
-  const chartData = useMemo(() => getCurrentWeekDays(workouts), [workouts]);
+  // Chart data (Uses the active month's data. If you want it to always be 'this week', 
+  // you might need a separate fetch just for the chart).
+  const chartData = useMemo(() => getCurrentWeekDays(filteredWorkouts), [filteredWorkouts]);
 
   return (
     <div className="min-h-screen flex flex-col items-center p-4 sm:p-6 pb-24 max-w-4xl mx-auto">
@@ -169,22 +185,26 @@ export default function WorkoutAnalysis() {
         </div>
       </div>
 
-      {/* Filtered Workouts List */}
+      {/* Filtered Workouts List & Loader */}
       <div className="w-full space-y-4">
         <div className="flex justify-between items-end px-1 mb-2">
           <h3 className="font-black text-2xl uppercase italic tracking-tighter">
             {MONTHS[activeMonth]} <span className="text-red-500">{activeYear}</span>
           </h3>
           <span className="text-xs font-bold bg-red-500/10 text-red-500 px-3 py-1 rounded-full border border-red-500/20">
-            {filteredWorkouts.length} SESSIONS
+            {isLoading ? "..." : filteredWorkouts.length} SESSIONS
           </span>
         </div>
 
-        {filteredWorkouts.length > 0 ? (
+        {/* Show Loader if fetching, otherwise show content */}
+        {isLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader />
+          </div>
+        ) : filteredWorkouts.length > 0 ? (
           <div className="grid gap-4">
              {filteredWorkouts.map((workout) => (
                 <WorkoutDisplay 
-                  // Because we mapped the data, it's just 'workout.id' now!
                   key={workout.id} 
                   workout={workout}
                 />
@@ -200,7 +220,6 @@ export default function WorkoutAnalysis() {
   );
 }
 
-// Chart Logic updated to use the CLEAN data
 const getCurrentWeekDays = (workouts: CleanWorkout[]) => {
     const today = new Date();
     const startOfWeek = new Date(today);
@@ -212,7 +231,6 @@ const getCurrentWeekDays = (workouts: CleanWorkout[]) => {
       d.setDate(startOfWeek.getDate() + i);
       
       const count = workouts.filter(w => {
-        // Look how clean this is compared to the old string checking!
         return w.createdAt.toDateString() === d.toDateString();
       }).length;
       

@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, Dumbbell, Calendar } from "lucide-react";
 
-// 1. We define the "Perfect" types here.
 export interface CleanExercise {
   id: string;
   name: string;
@@ -14,7 +13,7 @@ export interface CleanWorkout {
   workoutName: string;
   duration: number;
   exercises: CleanExercise[];
-  createdAt: Date; // A real, pure JavaScript Date object
+  createdAt: Date; 
 }
 
 export interface WorkoutProps {
@@ -22,7 +21,6 @@ export interface WorkoutProps {
 }
 
 export default function WorkoutDisplay({ workout }: WorkoutProps) {
-  // Since createdAt is already a Date object, formatting is incredibly easy
   const date = workout.createdAt.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -44,7 +42,7 @@ export default function WorkoutDisplay({ workout }: WorkoutProps) {
           </div>
           <div className="flex items-center gap-1 bg-secondary px-3 py-1 rounded-full text-xs font-medium">
             <Clock className="w-3.5 h-3.5" />
-            {workout.duration} mins
+            {Math.round(workout.duration / 60)} mins
           </div>
         </div>
       </CardHeader>
@@ -58,14 +56,15 @@ export default function WorkoutDisplay({ workout }: WorkoutProps) {
           <div className="grid grid-cols-1 gap-2">
             {workout.exercises.map((ex, index) => (
               <div
-                // Use the clean ID
                 key={ex.id + index}
                 className="flex justify-between items-center bg-muted/30 p-2 rounded-md text-sm"
               >
                 <span className="font-medium capitalize">{ex.name}</span>
                 <span className="text-muted-foreground">
-                  <span className="font-bold text-foreground">{ex.sets}</span> sets ×{" "}
-                  <span className="font-bold text-foreground">{ex.reps}</span> reps
+                  <span className="font-bold text-foreground">{ex.sets}</span>{" "}
+                  sets ×{" "}
+                  <span className="font-bold text-foreground">{ex.reps}</span>{" "}
+                  reps
                 </span>
               </div>
             ))}

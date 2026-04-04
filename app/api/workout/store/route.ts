@@ -43,32 +43,52 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    // 1. CRITICAL: Security Check (Only fetch workouts for the logged-in user)
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     await connectToDatabase();
 
-    const now = new Date();
+    // 2. Extract year and month from the URL query params
+    const searchParams = req.nextUrl.searchParams;
+    const yearParam = searchParams.get("year");
+    const monthParam = searchParams.get("month");
 
-    // Week start (Sunday se)
-    const startOfWeek = new Date(now);
-    startOfWeek.setHours(0, 0, 0, 0);
-    startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
+    // 3. Setup the base query (Filter by User ID)
+    const query: any = { userId: session.user.id };
 
-    // Week end (Saturday tak)
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-    endOfWeek.setHours(23, 59, 59, 999);
+    // 4. Handle Date Filtering
+    if (yearParam && monthParam) {
+      const year = parseInt(yearParam, 10);
+      const month = parseInt(monthParam, 10);
 
-    // Query workouts between start & end of week
-    const workouts = await DoneWorkout.find({
-      createdAt: { $gte: startOfWeek, $lte: endOfWeek },
-    }).sort({ createdAt: 1 });
+      // Start of the requested month
+      const startDate = new Date(year, month, 1);
+      // Start of the NEXT month (acts as our strict cutoff)
+      const endDate = new Date(year, month + 1, 1);
 
-    return NextResponse.json({ workouts }, {status: 200});
+      query.createdAt = { $gte: startDate, $lt: endDate };
+    } else {
+      // Fallback: If no year/month provided, fetch the current month
+      const now = new Date();
+      const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      
+      query.createdAt = { $gte: startDate, $lt: endDate };
+    }
+
+    // 5. Fetch and Sort (Newest workouts first)
+    const workouts = await DoneWorkout.find(query).sort({ createdAt: -1 });
+
+    return NextResponse.json({ workouts }, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to fetch current week workouts" },
+      { error: "Failed to fetch workouts" },
       { status: 500 }
     );
   }
