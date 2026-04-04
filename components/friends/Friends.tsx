@@ -6,7 +6,7 @@ import FriendRequests from "./FriendRequests";
 import FriendSearch from "./FriendSearch";
 import FriendList from "./FriendList";
 import { Button } from "../ui/button";
-import { Search } from "lucide-react";
+import { Search, UserPlus } from "lucide-react";
 import Loader from "../loader";
 import { useFriend } from "@/context/ChallengeContext";
 
@@ -14,10 +14,8 @@ const Friends = () => {
   const { data: session } = useSession();
   const userId = String(session?.user?.id ?? "");
   const [showSearch, setShowSearch] = useState(false);
-  const {friends, requests, isLoading} = useFriend();
+  const { friends, requests, isLoading } = useFriend();
 
-
-  // 🌀 Show only ONE loader if it is loading
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-[60vh]">
@@ -27,28 +25,38 @@ const Friends = () => {
   }
 
   return (
-    <div className="mt-5">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-24">
       {showSearch ? (
         <FriendSearch userId={userId} setShowSearch={setShowSearch} />
       ) : (
-        <>
-          {/* 🔍 Button to open Search Section */}
-          <div className="flex justify-end mx-5 mb-5">
+        <div className="space-y-8 animate-in fade-in duration-300">
+          
+          {/* Header & Search Action */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="font-black text-3xl tracking-tight">Community</h1>
+              <p className="text-muted-foreground font-medium mt-1">
+                Connect and train with your friends.
+              </p>
+            </div>
             <Button
               onClick={() => setShowSearch(true)}
-              className="flex gap-1 items-center relative left-0"
+              className="rounded-full font-bold shadow-sm"
+              size="sm"
             >
-              <Search size={18} />
-              Search Friends
+              <UserPlus className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Add Friend</span>
+              <span className="sm:hidden">Add</span>
             </Button>
           </div>
 
-          {/* 📨 Friend Requests */}
+          {/* Pending Requests Section */}
           <FriendRequests data={requests} />
 
-          {/* 👥 Friend List */}
-          <FriendList data={friends} userId={userId} />
-        </>
+          {/* Friends List Section */}
+          <FriendList data={friends} userId={userId} onSearchClick={() => setShowSearch(true)} />
+          
+        </div>
       )}
     </div>
   );
