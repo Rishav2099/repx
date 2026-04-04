@@ -85,15 +85,16 @@ export default function Home() {
         </div>
 
         {/* Workouts Section */}
-        <div className="max-w-[90vw] mx-auto">
-          <h2 className="text-xl font-bold mb-4 text-center">
-            Workouts{" "}
-            <span className="fixed right-5">
+        <div className="max-w-[90vw] mx-auto ">
+          <div className="relative flex items-center justify-center mb-6">
+            <h2 className="text-xl font-bold">Workouts</h2>
+
+            <div className="absolute right-0">
               <Link href={"/workout/add"}>
                 <Button className="cursor-pointer">Add Workout</Button>
               </Link>
-            </span>
-          </h2>
+            </div>
+          </div>
 
           {!(workouts.length === 0) ? (
             <>
@@ -119,9 +120,7 @@ export default function Home() {
     );
   }
 
-  if(!session){
-    return (
-     <LandingPage />
-    )
+  if (!session) {
+    return <LandingPage />;
   }
 }

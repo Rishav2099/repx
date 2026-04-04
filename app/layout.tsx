@@ -40,13 +40,13 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <QueryProvider>
-            <div className="min-h-[100vh]">
-              {children}
-              <div className="fixed bottom-0 w-full">
-                <Navbar />
+              <div className="min-h-dvh flex flex-col">
+                <main className="flex-1 pb-20">{children}</main>
+                <div className="fixed bottom-0 w-full">
+                  <Navbar />
+                </div>
               </div>
-            </div>
-            <Toaster />
+              <Toaster />
             </QueryProvider>
           </ThemeProvider>
         </AuthProvider>
