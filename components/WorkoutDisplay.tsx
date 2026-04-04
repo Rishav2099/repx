@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, Dumbbell, Calendar } from "lucide-react";
+import { Clock, Dumbbell, Calendar, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button"; // Make sure to import Button
 
 export interface CleanExercise {
   id: string;
@@ -18,9 +19,10 @@ export interface CleanWorkout {
 
 export interface WorkoutProps {
   workout: CleanWorkout;
+  onDelete?: (id: string) => void; // Added this prop
 }
 
-export default function WorkoutDisplay({ workout }: WorkoutProps) {
+export default function WorkoutDisplay({ workout, onDelete }: WorkoutProps) {
   const date = workout.createdAt.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -40,10 +42,28 @@ export default function WorkoutDisplay({ workout }: WorkoutProps) {
               <span>{date}</span>
             </div>
           </div>
-          <div className="flex items-center gap-1 bg-secondary px-3 py-1 rounded-full text-xs font-medium">
-            <Clock className="w-3.5 h-3.5" />
-            {Math.round(workout.duration / 60)} mins
+          
+          {/* Action Area: Duration + Delete Button */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 bg-secondary px-3 py-1 rounded-full text-xs font-medium">
+              <Clock className="w-3.5 h-3.5" />
+              {Math.round(workout.duration / 60)} mins
+            </div>
+            
+            {/* Delete Button (Only shows if onDelete is passed from parent) */}
+            {onDelete && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                onClick={() => onDelete(workout.id)}
+                title="Delete Workout"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
           </div>
+
         </div>
       </CardHeader>
 

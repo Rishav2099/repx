@@ -131,6 +131,38 @@ export default function WorkoutAnalysis() {
     [filteredWorkouts],
   );
 
+  // Inside your main page component...
+
+  const handleDeleteWorkout = async (workoutId: string) => {
+    // 1. Ask for confirmation so they don't accidentally click it
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this workout?",
+    );
+    if (!isConfirmed) return;
+
+    try {
+      // 2. Delete from the backend
+      await axios.delete(`/api/workout/store/${workoutId}`);
+
+      // 3. Remove it from the UI immediately without needing to refresh
+      // If you are using `setWorkoutCache` (from our previous refactor):
+      setWorkoutCache((prevCache) => {
+        const newCache = { ...prevCache };
+        // Search through the cache and filter out the deleted workout
+        for (const key in newCache) {
+          newCache[key] = newCache[key].filter((w) => w.id !== workoutId);
+        }
+        return newCache;
+      });
+
+      // Or if you are just using a simple setWorkouts(prev => ...):
+      // setWorkouts(prev => prev.filter(w => w.id !== workoutId));
+    } catch (error) {
+      console.error("Failed to delete workout:", error);
+      alert("Failed to delete workout. Please try again.");
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center p-4 sm:p-6 mb-24 max-w-4xl mx-auto ">
       <h1 className="text-2xl sm:text-3xl font-black mb-8 tracking-tighter text-center italic uppercase">
@@ -252,7 +284,11 @@ export default function WorkoutAnalysis() {
         ) : filteredWorkouts.length > 0 ? (
           <div className="grid gap-4">
             {filteredWorkouts.map((workout) => (
-              <WorkoutDisplay key={workout.id} workout={workout} />
+              <WorkoutDisplay
+                key={workout.id}
+                workout={workout}
+                onDelete={handleDeleteWorkout} // <-- Pass the function here!
+              />
             ))}
           </div>
         ) : (
