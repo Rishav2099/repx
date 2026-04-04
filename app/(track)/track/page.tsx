@@ -14,7 +14,7 @@ type Workout = {
   workoutName: string;
   createdAt: { $date: string } | string;
   duration: number;
-  exercises: any[];
+  exercises: unknown[];
 };
 
 const MONTHS = [
@@ -164,7 +164,7 @@ export default function WorkoutAnalysis() {
              {filteredWorkouts.map((workout) => (
                 <WorkoutDisplay 
                   key={typeof workout._id === 'string' ? workout._id : workout._id.$oid} 
-                  workout={workout as any} 
+                  workout={workout as unknown} 
                 />
               ))}
           </div>
