@@ -164,7 +164,7 @@ export default function WorkoutAnalysis() {
              {filteredWorkouts.map((workout) => (
                 <WorkoutDisplay 
                   key={typeof workout._id === 'string' ? workout._id : workout._id.$oid} 
-                  workout={workout as unknown} 
+                  workout={workout as any} 
                 />
               ))}
           </div>
