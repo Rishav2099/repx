@@ -6,9 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React, { useState } from "react";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { signIn } from "next-auth/react";
-import { Loader } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
+import Link from "next/link";
 
 export function SignupForm({
   className,
@@ -17,18 +18,20 @@ export function SignupForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [isSubmitting, setisSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
 
     if (!email || !password || !name) {
       setError("All fields are required");
       return;
     }
+    
     try {
-      setisSubmitting(true);
+      setIsSubmitting(true);
       const res = await axios.post("/api/auth/register", {
         email,
         name,
@@ -36,7 +39,6 @@ export function SignupForm({
       });
 
       if (res.status === 201) {
-        // ✅ Auto-login the user using NextAuth
         const result = await signIn("credentials", {
           redirect: true,
           email,
@@ -44,141 +46,152 @@ export function SignupForm({
           callbackUrl: "/",
         });
 
-        // Optional: Handle login errors
         if (result?.error) {
           setError("Login failed after signup");
         }
       }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        // ✅ AxiosError type safe
         setError(err.response?.data?.error || "Something went wrong");
       } else {
         setError("Unexpected error occurred");
       }
       console.error("Signup error:", err);
     } finally {
-      setisSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
     try {
-      setisSubmitting(true);
+      setIsSubmitting(true);
+      setError("");
       await signIn("google", { callbackUrl: "/" });
     } catch (error) {
       setError("Google registration failed");
     } finally {
-      setisSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0">
+    <div className={cn("flex flex-col gap-6 w-full max-w-4xl mx-auto", className)} {...props}>
+      <Card className="overflow-hidden border-border/50 shadow-2xl rounded-3xl">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form onSubmit={handleSubmit} className="p-6 md:p-8">
+          
+          {/* Form Section */}
+          <form onSubmit={handleSubmit} className="p-6 sm:p-10 flex flex-col justify-center">
             <div className="flex flex-col gap-6">
-              <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Welcome to Repx</h1>
-                <p className="text-muted-foreground text-balance">
-                  Create a new account
+              
+              <div className="flex flex-col items-center text-center mb-2">
+                <h1 className="text-3xl font-black tracking-tight text-foreground">Join Repx</h1>
+                <p className="text-muted-foreground font-medium mt-1 text-balance">
+                  Create an account to track your progress
                 </p>
               </div>
-              <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
-              <div className="grid gap-3">
-                <Label htmlFor="name">Name</Label>
+
+              {error && (
+                <div className="flex items-center gap-2 bg-red-500/10 text-red-500 p-3 rounded-xl text-sm font-semibold border border-red-500/20">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <p>{error}</p>
+                </div>
+              )}
+
+              <div className="grid gap-2">
+                <Label htmlFor="name" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Full Name</Label>
                 <Input
                   id="name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter your Name"
+                  placeholder="e.g. John Doe"
                   required
+                  className="h-12 rounded-xl bg-muted/30 focus-visible:ring-red-500 font-medium"
                 />
               </div>
-              <div className="grid gap-3">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="athlete@example.com"
+                  required
+                  className="h-12 rounded-xl bg-muted/30 focus-visible:ring-red-500 font-medium"
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="password" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Password</Label>
                 <Input
                   id="password"
-                  placeholder="Your Secret Password 🤫"
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
                   required
+                  className="h-12 rounded-xl bg-muted/30 focus-visible:ring-red-500 font-medium"
                 />
               </div>
-              <div>
-                <p className="text-rose-600">{error}</p>
-              </div>
-              <Button type="submit" disabled={isSubmitting}>
+
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/20 transition-transform active:scale-[0.98] mt-2"
+              >
                 {isSubmitting ? (
-                  <div className="flex items-center gap-2">
-                    <span>Signup</span>
-                    <span>
-                      <Loader className="animate-spin" />
-                    </span>
-                  </div>
-                ) : (
                   <>
-                    <span>Signup</span>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" /> Creating account...
                   </>
+                ) : (
+                  "Create Account"
                 )}
               </Button>
-              <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-                <span className="bg-card text-muted-foreground relative z-10 px-2">
+
+              <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border my-2">
+                <span className="bg-card text-muted-foreground relative z-10 px-4 font-medium uppercase text-xs tracking-widest">
                   Or continue with
                 </span>
               </div>
-              <div className="grid grid-cols-1 gap-4">
-                <Button
-                  variant="outline"
-                  onClick={handleGoogleSignIn}
-                  disabled={isSubmitting}
-                  type="button"
-                  className="w-full cursor-pointer"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path
-                      d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  <span className="sr-only">Login with Google</span>
-                </Button>
-              </div>
-              <div className="text-center text-sm">
-                Already have an account{" "}
-                <a href="/login" className="underline underline-offset-4">
-                  Login In
-                </a>
+
+              <Button 
+                onClick={handleGoogleSignIn} 
+                disabled={isSubmitting} 
+                variant="outline" 
+                type="button" 
+                className="h-12 rounded-xl font-bold border-border hover:bg-muted transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5 mr-2">
+                  <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" fill="currentColor" />
+                </svg>
+                Google
+              </Button>
+
+              <div className="text-center text-sm font-medium text-muted-foreground mt-4">
+                Already have an account?{" "}
+                <Link href="/login" className="text-foreground font-bold hover:text-red-500 hover:underline transition-colors">
+                  Log in
+                </Link>
               </div>
             </div>
           </form>
-          <div className="bg-muted relative hidden md:block">
+
+          {/* Desktop Image Section */}
+          <div className="bg-muted relative hidden md:block h-full min-h-[500px]">
+             <div className="absolute inset-0 bg-gradient-to-br from-red-600/20 to-background/80 z-10 mix-blend-multiply" />
             <img
               src="/placeholder.svg"
-              alt="Image"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+              alt="Fitness Background"
+              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.3] dark:grayscale"
             />
           </div>
         </CardContent>
       </Card>
-      <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+
+      <div className="text-muted-foreground text-center text-xs text-balance font-medium">
+        By clicking continue, you agree to our <Link href="#" className="hover:text-foreground underline underline-offset-4 transition-colors">Terms of Service</Link> and <Link href="#" className="hover:text-foreground underline underline-offset-4 transition-colors">Privacy Policy</Link>.
       </div>
     </div>
   );

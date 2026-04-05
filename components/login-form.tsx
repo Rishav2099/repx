@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { Loader } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
+import Link from "next/link";
 
 export function LoginForm({
   className,
@@ -22,16 +23,17 @@ export function LoginForm({
     e.preventDefault();
     try {
       setIsLoading(true);
+      setError(""); // Clear previous errors
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false, // Handle redirect manually
+        redirect: false,
       });
 
       if (result?.error) {
         setError(result.error);
       } else {
-        window.location.href = "/"; // Redirect on success
+        window.location.href = "/";
       }
     } catch {
       setError("An error occurred during login");
@@ -43,107 +45,128 @@ export function LoginForm({
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
+      setError("");
       await signIn("google", { callbackUrl: "/" });
     } catch (error) {
       setError("Google sign-in failed");
-    } finally{
-      setIsLoading(false)
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0">
+    <div className={cn("flex flex-col gap-6 w-full max-w-4xl mx-auto", className)} {...props}>
+      <Card className="overflow-hidden border-border/50 shadow-2xl rounded-3xl">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form onSubmit={handleSubmit} className="p-6 md:p-8">
+          
+          {/* Form Section */}
+          <form onSubmit={handleSubmit} className="p-6 sm:p-10 flex flex-col justify-center">
             <div className="flex flex-col gap-6">
-              <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
-                <p className="text-muted-foreground text-balance">
-                  Login to your Repx Account
+              
+              <div className="flex flex-col items-center text-center mb-2">
+                <h1 className="text-3xl font-black tracking-tight text-foreground">Welcome Back</h1>
+                <p className="text-muted-foreground font-medium mt-1 text-balance">
+                  Log in to your <span className="font-bold text-red-500">Repx</span> account
                 </p>
               </div>
-              <div className="grid gap-3">
-                <Label htmlFor="email">Email or username</Label>
+
+              {error && (
+                <div className="flex items-center gap-2 bg-red-500/10 text-red-500 p-3 rounded-xl text-sm font-semibold border border-red-500/20">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <p>{error}</p>
+                </div>
+              )}
+
+              <div className="grid gap-2">
+                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Email or Username</Label>
                 <Input
                   id="email"
                   type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter Email or username"
+                  placeholder="athlete@example.com"
                   required
+                  className="h-12 rounded-xl bg-muted/30 focus-visible:ring-red-500 font-medium"
                 />
               </div>
-              <div className="grid gap-3">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <a
+
+              <div className="grid gap-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Password</Label>
+                  <Link
                     href="#"
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
+                    className="text-xs font-bold text-red-500 hover:text-red-600 hover:underline transition-colors"
                   >
-                    Forgot your password?
-                  </a>
+                    Forgot password?
+                  </Link>
                 </div>
                 <Input
                   id="password"
-                  placeholder="Your Secret Password 🤫"
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
                   required
+                  className="h-12 rounded-xl bg-muted/30 focus-visible:ring-red-500 font-medium"
                 />
-                <p className="text-rose-500">{error}</p>
               </div>
+
               <Button
                 disabled={isLoading}
                 type="submit"
-                className="cursor-pointer"
+                className="h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/20 transition-transform active:scale-[0.98] mt-2"
               >
                 {isLoading ? (
                   <>
-                    <p>Logining</p>
-                    <Loader className="animate-spin" />
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" /> Logging in...
                   </>
                 ) : (
-                  <p>Login</p>
+                  "Login"
                 )}
               </Button>
-              <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-                <span className="bg-card text-muted-foreground relative z-10 px-2">
+
+              <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border my-2">
+                <span className="bg-card text-muted-foreground relative z-10 px-4 font-medium uppercase text-xs tracking-widest">
                   Or continue with
                 </span>
               </div>
-              <div className="grid grid-cols-1 gap-4">
-                <Button onClick={handleGoogleSignIn} disabled={isLoading} variant="outline" type="button" className="w-full cursor-pointer">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path
-                      d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  <span className="sr-only">Login with Google</span>
-                </Button>
-              </div>
-              <div className="text-center text-sm">
+
+              <Button 
+                onClick={handleGoogleSignIn} 
+                disabled={isLoading} 
+                variant="outline" 
+                type="button" 
+                className="h-12 rounded-xl font-bold border-border hover:bg-muted transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5 mr-2">
+                  <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" fill="currentColor" />
+                </svg>
+                Google
+              </Button>
+
+              <div className="text-center text-sm font-medium text-muted-foreground mt-4">
                 Don&apos;t have an account?{" "}
-                <a href="/sign-up" className="underline underline-offset-4">
+                <Link href="/sign-up" className="text-foreground font-bold hover:text-red-500 hover:underline transition-colors">
                   Sign up
-                </a>
+                </Link>
               </div>
             </div>
           </form>
-          <div className="bg-muted relative hidden md:block">
+
+          {/* Desktop Image Section */}
+          <div className="bg-muted relative hidden md:block h-full min-h-[500px]">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-600/20 to-background/80 z-10 mix-blend-multiply" />
             <img
               src="/placeholder.svg"
-              alt="Image"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+              alt="Fitness Background"
+              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.3] dark:grayscale"
             />
           </div>
         </CardContent>
       </Card>
-      <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+      
+      <div className="text-muted-foreground text-center text-xs text-balance font-medium">
+        By clicking continue, you agree to our <Link href="#" className="hover:text-foreground underline underline-offset-4 transition-colors">Terms of Service</Link> and <Link href="#" className="hover:text-foreground underline underline-offset-4 transition-colors">Privacy Policy</Link>.
       </div>
     </div>
   );
