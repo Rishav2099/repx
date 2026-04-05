@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, List, Flag, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, List, Flag, X, Loader2 } from "lucide-react"; // <-- Added Loader2
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -47,8 +47,10 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
   const [breakDuration, setBreakDuration] = useState(0);
   const [showBreakDropdown, setShowBreakDropdown] = useState(false);
 
-  // NEW: State for the End Workout Dialog
   const [showEndDialog, setShowEndDialog] = useState(false);
+  
+  // NEW: State to prevent double-clicking the finish button
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     beepAudioRef.current = new Audio("/sounds/beep.mp3");
@@ -69,11 +71,11 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    if (!isPaused) {
+    if (!isPaused && !isSaving) { // Pause timer if saving
       interval = setInterval(() => setDuration((prev) => prev + 1), 1000);
     }
     return () => { if (interval) clearInterval(interval); };
-  }, [isPaused]);
+  }, [isPaused, isSaving]);
 
   useEffect(() => {
     let breakInterval: NodeJS.Timeout | null = null;
@@ -107,7 +109,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
   }, [currentIndex, workout]);
 
   useEffect(() => {
-    if (exerciseTime <= 0 || isPaused || exerciseBreak) return;
+    if (exerciseTime <= 0 || isPaused || exerciseBreak || isSaving) return;
     const timer = setInterval(() => {
       setExerciseTime((prev) => {
         if (prev <= 1) {
@@ -119,7 +121,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [exerciseTime, isPaused, exerciseBreak]);
+  }, [exerciseTime, isPaused, exerciseBreak, isSaving]);
 
   const endBreak = () => {
     setExerciseBreak(false);
@@ -133,8 +135,12 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
     setWorkout({ ...workout, exercises: updatedExercises });
   };
 
+  // UPDATED: Added isSaving protection
   const storeWorkout = async (finalExercises: Exercise[]) => {
+    if (isSaving) return; // Prevent duplicate network requests
+    
     try {
+      setIsSaving(true);
       const payload = { workoutName: workout?.workoutName, exercises: finalExercises };
       const res = await axios.post(`/api/workout/store`, { doneWorkout: payload, duration });
       if (res.status === 201) {
@@ -142,11 +148,12 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
       }
     } catch (error) {
       console.log(error);
+      setIsSaving(false); // Only reset if there's an error, otherwise we are navigating away
     }
   };
 
   const handleExerciseComplete = () => {
-    if (!workout) return;
+    if (!workout || isSaving) return;
     const currentExercise = workout.exercises[currentIndex];
     const totalSets = currentExercise.sets || 1;
 
@@ -162,13 +169,14 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
         setCurrentSet(1); 
         startBreak();
       } else {
+        // Last exercise completed!
         storeWorkout(updatedExercises);
       }
     }
   };
 
-  // NEW: Early End Handler
   const handleEndWorkoutEarly = () => {
+    if (isSaving) return;
     setShowEndDialog(false);
     const exercisesToSave = doneWorkout ? doneWorkout.exercises : [];
     
@@ -186,7 +194,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   const navigateExercise = (direction: 1 | -1) => {
-    if (!workout) return;
+    if (!workout || isSaving) return;
     const newIndex = currentIndex + direction;
     if (newIndex >= 0 && newIndex < workout.exercises.length) {
       setCurrentIndex(newIndex);
@@ -228,23 +236,26 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
           <Button
             onClick={() => navigateExercise(-1)}
             variant="outline"
-            disabled={isPaused || exerciseBreak || currentIndex === 0}
+            disabled={isPaused || exerciseBreak || currentIndex === 0 || isSaving}
             className="w-16 h-14 rounded-2xl"
           >
             <ArrowLeft className="w-6 h-6" />
           </Button>
+          
+          {/* UPDATED: Loading State on DONE button */}
           <Button
             onClick={handleExerciseComplete}
             variant="primary"
-            disabled={isPaused || exerciseBreak}
+            disabled={isPaused || exerciseBreak || isSaving}
             className="w-40 h-14 font-black text-xl rounded-2xl shadow-lg shadow-red-500/20"
           >
-            DONE
+            {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : "DONE"}
           </Button>
+
           <Button
             onClick={() => navigateExercise(1)}
             variant="outline"
-            disabled={isPaused || exerciseBreak || workout.exercises.length - 1 === currentIndex}
+            disabled={isPaused || exerciseBreak || workout.exercises.length - 1 === currentIndex || isSaving}
             className="w-16 h-14 rounded-2xl"
           >
             <ArrowRight className="w-6 h-6" />
@@ -252,13 +263,12 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
         </div>
       </div>
 
-      {/* 3. Bottom App Bar (View Exercises & End Workout) */}
+      {/* 3. Bottom App Bar */}
       <div className="border-t bg-card/50 backdrop-blur-md px-4 py-4 pb-safe flex gap-3 z-40">
         
-        {/* Drawer Component Restored */}
         <Drawer>
           <DrawerTrigger asChild>
-            <Button variant="secondary" className="flex-1 h-12 rounded-xl font-bold">
+            <Button variant="secondary" className="flex-1 h-12 rounded-xl font-bold" disabled={isSaving}>
               <List className="w-4 h-4 mr-2" />
               View Plan
             </Button>
@@ -277,6 +287,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
                       : "border-border hover:bg-accent"
                   }`}
                   onClick={() => {
+                    if (isSaving) return;
                     setCurrentIndex(index);
                     setCurrentSet(1);
                   }}
@@ -302,6 +313,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
           variant="destructive" 
           className="flex-1 h-12 rounded-xl font-bold bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20"
           onClick={() => setShowEndDialog(true)}
+          disabled={isSaving}
         >
           <Flag className="w-4 h-4 mr-2" />
           Finish Early
@@ -326,7 +338,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
               <div className="bg-red-500/10 p-3 rounded-full text-red-500">
                 <Flag className="w-6 h-6" />
               </div>
-              <button onClick={() => setShowEndDialog(false)} className="text-muted-foreground p-1 hover:bg-accent rounded-full transition-colors">
+              <button onClick={() => setShowEndDialog(false)} disabled={isSaving} className="text-muted-foreground p-1 hover:bg-accent rounded-full transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -335,11 +347,11 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
               Are you sure you want to end your workout early? Only the exercises you have marked as Done will be saved to your history.
             </p>
             <div className="flex gap-3">
-              <Button variant="secondary" className="flex-1 h-12 rounded-xl font-bold" onClick={() => setShowEndDialog(false)}>
+              <Button variant="secondary" className="flex-1 h-12 rounded-xl font-bold" onClick={() => setShowEndDialog(false)} disabled={isSaving}>
                 Resume
               </Button>
-              <Button variant="default" className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white" onClick={handleEndWorkoutEarly}>
-                Yes, Finish
+              <Button variant="default" className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white" onClick={handleEndWorkoutEarly} disabled={isSaving}>
+                {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : "Yes, Finish"}
               </Button>
             </div>
           </div>
