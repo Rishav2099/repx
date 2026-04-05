@@ -24,7 +24,7 @@ const Navbar = () => {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <div className="dark:bg-black bg-white">
+    <div className="dark:bg-black bg-white select-none">
       <ul className="flex justify-evenly items-center w-full py-3 border-t-2 text-xs select-none">
         <li
           className={`flex flex-col items-center cursor-pointer ${
