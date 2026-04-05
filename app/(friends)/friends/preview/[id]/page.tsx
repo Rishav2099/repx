@@ -112,7 +112,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
           Invite Expired
         </p>
         <p className="text-muted-foreground font-medium mb-8">
-          We couldn't find this friend request. The link may be invalid or already processed.
+          We could not find this friend request. The link may be invalid or already processed.
         </p>
         <Button 
           className="w-full h-12 rounded-xl font-bold bg-foreground text-background hover:bg-foreground/90"
