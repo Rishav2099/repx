@@ -118,7 +118,7 @@ const AcceptedChallenge = ({ acceptedChallenges }: AcceptedChallengeProps) => {
                 </h3>
                 {ch.description && (
                   <p className="mt-1 text-sm font-medium text-muted-foreground max-w-sm mx-auto">
-                    "{ch.description}"
+                    {ch.description}
                   </p>
                 )}
               </div>
