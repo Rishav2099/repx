@@ -5,6 +5,8 @@ import React, { useEffect, useState, useMemo } from "react";
 import PendingChallenges from "./PendingChallenges";
 import AcceptedChallenge from "./AcceptedChallenge";
 import { useSession } from "next-auth/react";
+import { Swords, Trophy } from "lucide-react";
+import Loader from "@/components/loader";
 
 export interface ChallengeProps {
   _id: string;
@@ -38,7 +40,6 @@ const Challenges = () => {
   const [acceptedChallenges, setAcceptedChallenges] = useState<ChallengeProps[]>([]);
   const [pendingChallenges, setPendingChallenges] = useState<ChallengeProps[]>([]);
 
-  // Memoize to avoid recomputing on every render
   const { accepted, pending } = useMemo(() => {
     if (!userId || !Array.isArray(friends) || friends.length === 0) {
       return { accepted: [], pending: [] };
@@ -48,66 +49,70 @@ const Challenges = () => {
 
     const accepted = allChallenges.filter((ch) => {
       const isAccepted = ch.status === "accepted";
-      const isResignedByOpponent =
-        ch.status === "resigned" && ch.challenger._id === userId;
-
+      const isResignedByOpponent = ch.status === "resigned" && ch.challenger._id === userId;
       return isAccepted || isResignedByOpponent;
     });
 
     const pending = allChallenges.filter((ch) => {
       const isPending = ch.status === "pending";
-      const isRelevantToUser =
-        ch.challenger._id === userId || ch.challengee._id === userId;
+      const isRelevantToUser = ch.challenger._id === userId || ch.challengee._id === userId;
       return isPending && isRelevantToUser;
     });
-
-    console.log(allChallenges)
 
     return { accepted, pending };
   }, [friends, userId]);
 
-  // Sync state only when memoized values change
   useEffect(() => {
     setAcceptedChallenges(accepted);
     setPendingChallenges(pending);
   }, [accepted, pending]);
 
-  // Loading
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center py-10">
-        <div className="animate-pulse text-gray-400">Loading challenges...</div>
-      </div>
-    );
+    return <div className="flex justify-center py-20"><Loader /></div>;
   }
 
-  // Empty state
   if (acceptedChallenges.length === 0 && pendingChallenges.length === 0) {
     return (
-      <div className="text-center py-10">
-        <h2 className="text-xl font-semibold mb-4">Challenges</h2>
-        <p className="text-gray-400">No challenges found.</p>
+      <div className="flex flex-col items-center justify-center py-16 px-4 text-center border-2 border-dashed border-border rounded-3xl bg-muted/10 max-w-2xl mx-auto mt-8">
+        <div className="bg-muted p-4 rounded-full mb-4">
+          <Trophy className="w-8 h-8 text-muted-foreground" />
+        </div>
+        <h4 className="font-bold text-xl mb-2">No Active Challenges</h4>
+        <p className="text-muted-foreground mb-6 max-w-sm font-medium">
+          Ready to push your limits? Go to your Friends list and challenge someone to a duel!
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 pb-10">
-      <h2 className="text-2xl font-bold text-center">Challenges</h2>
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 space-y-10 pb-20 pt-6 animate-in fade-in duration-300">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-black tracking-tight flex items-center justify-center gap-2">
+          <Swords className="w-8 h-8 text-red-600" />
+          Active Duels
+        </h2>
+      </div>
 
-      {/* Pending Challenges */}
       {pendingChallenges.length > 0 && (
-        <section>
-          <h3 className="text-lg font-medium text-center mb-3 text-orange-400">
-            Pending
-          </h3>
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 px-2">
+            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+              Awaiting Response
+            </h3>
+          </div>
           <PendingChallenges pendingChallenges={pendingChallenges} />
         </section>
       )}
 
-      {/* Accepted / Resigned Challenges */}
       {acceptedChallenges.length > 0 && (
-        <section>
+        <section className="space-y-4 mt-8">
+          <div className="flex items-center gap-2 px-2">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+              In Progress
+            </h3>
+          </div>
           <AcceptedChallenge acceptedChallenges={acceptedChallenges} />
         </section>
       )}

@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { EllipsisVerticalIcon } from "lucide-react";
+import { EllipsisVerticalIcon, Flag } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { toast } from "sonner";
-import axios from "axios"; // ← ADD THIS
+import axios from "axios";
 
 interface AcceptedChallengeProps {
   acceptedChallenges: ChallengeProps[];
@@ -36,13 +36,11 @@ const AcceptedChallenge = ({ acceptedChallenges }: AcceptedChallengeProps) => {
   const userId = session?.user?.id;
   const queryClient = useQueryClient();
 
-  // State for confirmation dialog
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogAction, setDialogAction] = useState<"resign" | "delete" | null>(null);
   const [dialogChallengeId, setDialogChallengeId] = useState<string | null>(null);
-  const [isSubmitting , setIsSubmitting ] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Handlers
   const openDialog = (action: "resign" | "delete", id: string) => {
     setDialogAction(action);
     setDialogChallengeId(id);
@@ -58,133 +56,125 @@ const AcceptedChallenge = ({ acceptedChallenges }: AcceptedChallengeProps) => {
         dialogAction === "resign"
           ? `/api/challenges/${dialogChallengeId}/resign`
           : `/api/challenges/${dialogChallengeId}/delete`;
-
       const method = dialogAction === "resign" ? "POST" : "DELETE";
 
-      // Axios with method
-      const response = await axios({
-        method,
-        url,
-      });
+      await axios({ method, url });
 
-      toast.success(
-        dialogAction === "resign" ? "Resigned successfully" : "Challenge deleted"
-      );
-
+      toast.success(dialogAction === "resign" ? "Resigned successfully" : "Challenge deleted");
       queryClient.invalidateQueries({ queryKey: ["friends"] });
     } catch (error) {
-      // Axios error handling
-      const message = "Something went wrong";
-      toast.error(message);
+      toast.error("Something went wrong");
     } finally {
       setDialogOpen(false);
       setDialogAction(null);
       setDialogChallengeId(null);
-      setIsSubmitting(false)
-    } 
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <>
-      <div className="flex flex-col items-center w-full py-5 mb-16 gap-5">
+      <div className="flex flex-col gap-8 w-full">
         {acceptedChallenges.map((ch) => {
           const isChallenger = ch.challenger._id === userId;
           const isChallengee = ch.challengee._id === userId;
           const canResign = isChallengee && ch.status === "accepted";
           const canDelete =
-            isChallenger &&
-            ["accepted", "resigned", "pending"].includes(ch.status);
+            isChallenger && ["accepted", "resigned", "pending"].includes(ch.status);
           const showResignedBadge = isChallenger && ch.status === "resigned";
 
           return (
             <div
               key={ch._id}
-              className="flex flex-col items-center bg-[#1a1a1a] w-[90vw] md:w-[80vw] md:max-w-[800px] py-5 rounded-lg relative"
+              className="flex flex-col items-center bg-card border shadow-lg w-full max-w-2xl mx-auto py-6 sm:py-8 rounded-3xl relative"
             >
-              {/* Header */}
-              <div className="grid grid-cols-3 place-items-center w-full">
-                <div className="flex flex-col items-center">
-                  <ProgressAvatar
-                    progress={calcProgress(ch.progress?.challenger?.length, ch.forDays)}
-                    name={getInitials(ch.challenger.name)}
-                    image={ch.challenger.image ?? ""}
-                  />
-                  <p className="mt-1">{ch.challenger.name}</p>
-                </div>
-
-                <h3 className="font-bold text-2xl md:text-3xl text-center">
-                  {ch.challengeName}
-                </h3>
-
-                <div className="flex flex-col items-center">
-                  <ProgressAvatar
-                    progress={calcProgress(ch.progress?.challengee?.length, ch.forDays)}
-                    name={getInitials(ch.challengee.name)}
-                    image={ch.challengee.image ?? ""}
-                  />
-                  <p className="mt-1">{ch.challengee.name}</p>
-                </div>
-              </div>
-
-              {ch.description && (
-                <p className="mt-3 text-center text-sm text-gray-400 px-4">
-                  {ch.description}
-                </p>
-              )}
-
-              {showResignedBadge && (
-                <p className="mt-2 text-xs text-orange-400">
-                  Opponent resigned
-                </p>
-              )}
-
-              {/* Calendar */}
-              <div className="mt-6 w-full flex justify-center">
-                <ChallengeCalendar
-                  challengerDates={ch.progress.challenger}
-                  challengeeDates={ch.progress.challengee}
-                  startDate={ch.startDate.split("T")[0]}
-                  endDate={ch.endDate.split("T")[0]}
-                  id={ch._id}
-                  challengerName={ch.challenger.name}
-                  challengeeName={ch.challengee.name}
-                />
-              </div>
-
-              {/* Dropdown */}
+              {/* Context Menu */}
               {(canResign || canDelete) && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-2 top-2"
-                    >
+                    <Button variant="ghost" size="icon" className="absolute right-4 top-4 text-muted-foreground">
                       <EllipsisVerticalIcon className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent align="end" className="rounded-xl">
                     {canResign && (
-                      <DropdownMenuItem
-                        className="text-orange-500 font-semibold"
-                        onSelect={() => openDialog("resign", ch._id)}
-                      >
-                        Resign
+                      <DropdownMenuItem className="text-orange-500 font-semibold" onSelect={() => openDialog("resign", ch._id)}>
+                        <Flag className="w-4 h-4 mr-2" /> Resign
                       </DropdownMenuItem>
                     )}
                     {canDelete && (
-                      <DropdownMenuItem
-                        className="text-red-500 font-semibold"
-                        onSelect={() => openDialog("delete", ch._id)}
-                      >
-                        {ch.status === "resigned"
-                          ? "Delete (Resigned)"
-                          : "Delete Challenge"}
+                      <DropdownMenuItem className="text-red-500 font-semibold" onSelect={() => openDialog("delete", ch._id)}>
+                        {ch.status === "resigned" ? "Delete (Resigned)" : "Delete Challenge"}
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
+
+              {/* Title & Description */}
+              <div className="text-center px-4 mb-6">
+                <h3 className="font-black text-2xl md:text-3xl tracking-tighter uppercase text-foreground">
+                  {ch.challengeName}
+                </h3>
+                {ch.description && (
+                  <p className="mt-1 text-sm font-medium text-muted-foreground max-w-sm mx-auto">
+                    "{ch.description}"
+                  </p>
+                )}
+              </div>
+
+              {/* VS Header Layout */}
+              <div className="flex justify-center items-center w-full px-6 mb-6">
+                <div className="flex flex-col items-center flex-1">
+                  <ProgressAvatar
+                    progress={calcProgress(ch.progress?.challenger?.length, ch.forDays)}
+                    name={getInitials(ch.challenger.name)}
+                    image={ch.challenger.image ?? ""}
+                  />
+                  <p className="mt-2 font-bold text-sm uppercase tracking-widest truncate max-w-[100px] sm:max-w-[150px]">
+                    {ch.challenger.name}
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-center justify-center px-4">
+                  <div className="bg-red-600 text-white font-black italic text-xl px-3 py-1 rounded-lg transform -skew-x-12 shadow-md">
+                    VS
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center flex-1">
+                  <ProgressAvatar
+                    progress={calcProgress(ch.progress?.challengee?.length, ch.forDays)}
+                    name={getInitials(ch.challengee.name)}
+                    image={ch.challengee.image ?? ""}
+                  />
+                  <p className="mt-2 font-bold text-sm uppercase tracking-widest truncate max-w-[100px] sm:max-w-[150px]">
+                    {ch.challengee.name}
+                  </p>
+                </div>
+              </div>
+
+              {showResignedBadge && (
+                <div className="bg-orange-500/10 text-orange-500 border border-orange-500/20 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+                  Opponent Resigned
+                </div>
+              )}
+
+              {/* Calendar Section */}
+              <div className="w-full px-4 sm:px-8 mt-2">
+                <div className="bg-muted/30 rounded-2xl p-4 border border-border/50">
+                  <ChallengeCalendar
+                    challengerDates={ch.progress.challenger}
+                    challengeeDates={ch.progress.challengee}
+                    startDate={ch.startDate.split("T")[0]}
+                    endDate={ch.endDate.split("T")[0]}
+                    id={ch._id}
+                    challengerName={ch.challenger.name.split(" ")[0]} // First name only for cleaner legend
+                    challengeeName={ch.challengee.name.split(" ")[0]}
+                  />
+                </div>
+              </div>
+
             </div>
           );
         })}
@@ -192,23 +182,21 @@ const AcceptedChallenge = ({ acceptedChallenges }: AcceptedChallengeProps) => {
 
       {/* Confirmation Dialog */}
       <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-3xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {dialogAction === "resign"
-                ? "Resign from Challenge?"
-                : "Delete Challenge Permanently?"}
+            <AlertDialogTitle className="font-black text-xl">
+              {dialogAction === "resign" ? "Resign from Challenge?" : "Delete Challenge?"}
             </AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="font-medium text-base">
               {dialogAction === "resign"
-                ? "You will leave this challenge. The challenger will be notified."
-                : "This action cannot be undone. The challenge and all progress will be deleted."}
+                ? "You will forfeit this challenge. Your opponent will be notified of your surrender."
+                : "This action cannot be undone. The challenge and all progress will be permanently wiped."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction disabled={isSubmitting} onClick={handleConfirm} className="font-semibold ">
-              {dialogAction === "resign" ? "Resign" : "Delete"}
+            <AlertDialogCancel className="rounded-xl font-bold">Cancel</AlertDialogCancel>
+            <AlertDialogAction disabled={isSubmitting} onClick={handleConfirm} className="rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white">
+              {dialogAction === "resign" ? "Surrender" : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -231,20 +219,26 @@ const ProgressAvatar = ({
   image: string;
   name: string;
 }) => {
-  const bg = `conic-gradient(#e7000b ${progress * 3.6}deg, #333 0deg)`;
+  // Uses tailwind red-600 (rgb(220 38 38)) and transparent for theme compatibility
+  const bg = `conic-gradient(rgb(220 38 38) ${progress * 3.6}deg, transparent 0deg)`;
 
   return (
     <div className="flex flex-col items-center">
       <div
-        className="w-14 h-14 rounded-full flex items-center justify-center p-[3px]"
+        className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center bg-muted"
         style={{ background: bg }}
       >
-        <Avatar className="w-12 h-12 border-2 border-[#1a1a1a]">
-          <AvatarImage src={image} />
-          <AvatarFallback>{name}</AvatarFallback>
-        </Avatar>
+        {/* Inner circle acts as a mask to create the ring effect */}
+        <div className="w-[72px] h-[72px] sm:w-[88px] sm:h-[88px] rounded-full bg-card flex items-center justify-center p-1">
+          <Avatar className="w-full h-full border-2 border-border shadow-inner">
+            <AvatarImage src={image} className="object-cover" />
+            <AvatarFallback className="font-black text-xl bg-muted text-muted-foreground">{name}</AvatarFallback>
+          </Avatar>
+        </div>
       </div>
-      <p className="text-xs mt-1 text-gray-300">{progress}%</p>
+      <div className="mt-2 bg-background border shadow-sm px-2 py-0.5 rounded-full text-xs font-bold tabular-nums">
+        {progress}%
+      </div>
     </div>
   );
 };

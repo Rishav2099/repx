@@ -6,6 +6,7 @@ import axios from "axios";
 import { isBefore, isAfter, startOfDay } from "date-fns";
 import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 interface ChallengeCalendarProps {
   challengerDates?: string[];
@@ -60,7 +61,7 @@ const ChallengeCalendar = ({
       });
 
       if (status === 200) {
-        toast.success("Progress updated!");
+        toast.success("Progress logged!");
         queryClient.invalidateQueries({ queryKey: ["friends"] });
       }
     } catch {
@@ -71,11 +72,19 @@ const ChallengeCalendar = ({
   };
 
   return (
-    <div className="flex flex-col items-center p-3 sm:p-4 bg-[#0e0e0e] rounded-2xl shadow-xl w-full max-w-sm mx-auto">
+    <div className="relative flex flex-col items-center p-4 sm:p-6 bg-background border border-border rounded-[2rem] shadow-sm w-full max-w-sm mx-auto overflow-hidden">
+      
+      {/* Loading Overlay */}
+      {isClicked && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/50 backdrop-blur-[2px]">
+          <Loader2 className="w-8 h-8 animate-spin text-red-500" />
+        </div>
+      )}
+
       <Calendar
         onDayClick={handleDateClick}
         mode="single"
-        className="rounded-xl border border-neutral-800 bg-[#111] text-white w-full text-xs sm:text-sm"
+        className="w-full text-sm font-medium"
         modifiers={{
           challenger: challengerDays,
           challengee: challengeeDays,
@@ -83,20 +92,20 @@ const ChallengeCalendar = ({
           today: [today],
         }}
         modifiersClassNames={{
-          // Challenger: red border (outer)
+          // Challenger: Red outer ring
           challenger:
-            "relative after:absolute after:inset-0 after:rounded-full after:border-2 after:border-red-500 after:pointer-events-none ",
+            "relative after:absolute after:inset-[2px] after:rounded-full after:border-2 after:border-red-500 after:pointer-events-none text-foreground",
 
-          // Challengee: white ring (inner)
+          // Challengee: Dynamic foreground inner ring
           challengee:
-            "relative after:absolute after:inset-1 after:rounded-full after:ring-2 after:ring-white after:pointer-events-none ",
+            "relative after:absolute after:inset-[6px] after:rounded-full after:border-[1.5px] after:border-foreground after:pointer-events-none text-foreground",
 
-          // Both: red border + white ring (stacked)
+          // Both: Red outer + Foreground inner
           both:
-            "relative after:absolute after:inset-0 after:rounded-full after:border-2 after:border-red-500 after:pointer-events-none  before:absolute before:inset-1 before:rounded-full before:ring-2 before:ring-white before:pointer-events-none before:z-20",
+            "relative after:absolute after:inset-[2px] after:rounded-full after:border-2 after:border-red-500 after:pointer-events-none before:absolute before:inset-[7px] before:rounded-full before:border-[1.5px] before:border-foreground before:pointer-events-none before:z-20 text-foreground",
 
-          // Today: subtle gray border
-          today: "border border-gray-500 rounded-lg",
+          // Today highlight
+          today: "font-black bg-muted rounded-full text-foreground",
         }}
         disabled={(date) =>
           isBefore(startOfDay(date), start) ||
@@ -105,20 +114,20 @@ const ChallengeCalendar = ({
         }
       />
 
-      {/* Legend */}
-      <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-4 text-xs sm:text-sm text-gray-300">
-        <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 border-red-500"></span>
-          <p>{challengerName}</p>
+      {/* Modern Legend */}
+      <div className="flex flex-wrap justify-center gap-4 sm:gap-5 mt-6 pt-5 border-t border-border/50 text-xs sm:text-sm font-semibold text-muted-foreground w-full">
+        <div className="flex items-center gap-2">
+          <span className="w-3.5 h-3.5 rounded-full border-2 border-red-500"></span>
+          <p className="capitalize truncate max-w-[80px]">{challengerName}</p>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-white ring-2 ring-white ring-offset-1 ring-offset-transparent"></span>
-          <p>{challengeeName}</p>
+        <div className="flex items-center gap-2">
+          <span className="w-3.5 h-3.5 rounded-full border-2 border-foreground"></span>
+          <p className="capitalize truncate max-w-[80px]">{challengeeName}</p>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="relative w-3 h-3 sm:w-4 sm:h-4">
+        <div className="flex items-center gap-2">
+          <span className="relative w-3.5 h-3.5">
             <span className="absolute inset-0 rounded-full border-2 border-red-500"></span>
-            <span className="absolute inset-0.5 rounded-full ring-2 ring-white"></span>
+            <span className="absolute inset-[3px] rounded-full border border-foreground"></span>
           </span>
           <p>Both</p>
         </div>
